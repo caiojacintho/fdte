@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+*.log
+.DS_Store
+
+# env files (contain local-only config; .env.example should be committed instead)
+.env
+.env.local
+
+# sqlite runtime db
+server/data/*.db
+server/data/*.db-journal
+.claude/settings.local.json

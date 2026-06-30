@@ -1,0 +1,185 @@
+:root {
+  /* Paleta extraída do tabuleiro e dos painéis "Nosso Bairro" (PLANEHAB / Governo da Bahia / FDTE) */
+  --color-bg: #f6e7cd;
+  --color-bg-deep: #ecd2a4;
+  --color-paper: #faf1e0;
+  --color-ink: #3b2a20;
+  --color-ink-soft: #6b4f3a;
+  --color-ink-faint: #9a8268;
+
+  --color-primary: #e2298c;
+  --color-primary-dark: #ad1f6c;
+  --color-primary-soft: #f6c1de;
+
+  --color-secondary: #2fa9b8;
+  --color-secondary-dark: #1f7a86;
+  --color-secondary-soft: #c9eef2;
+
+  --color-accent: #f2a93b;
+  --color-accent-dark: #c97f17;
+
+  --color-surface: #ffffff;
+  --color-success: #3f9142;
+  --color-danger: #c53d3d;
+
+  --font-heading: 'Baloo 2', 'Nunito', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+
+  --shadow-card: 0 6px 18px rgba(59, 42, 32, 0.18);
+  --shadow-soft: 0 2px 8px rgba(59, 42, 32, 0.12);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  border: 3px solid var(--color-ink);
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  background: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.card-surface {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.field label {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field input,
+.field select {
+  border: 2px solid var(--color-ink-faint);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 1rem;
+  background: white;
+  color: var(--color-ink);
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.error-text {
+  color: var(--color-danger);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-secondary-soft);
+  color: var(--color-secondary-dark);
+}
