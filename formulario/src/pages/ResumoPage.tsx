@@ -107,7 +107,7 @@ export function ResumoPage() {
 
         {!isCompleted ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-            <button className="btn btn-ghost" type="button" onClick={() => navigate('/jogo/painel')}>
+            <button className="btn btn-ghost" type="button" onClick={() => navigate('/jogo/tabuleiro')}>
               Voltar e editar
             </button>
             <button className="btn" type="button" disabled={sending} onClick={handleSubmit}>

@@ -1,4 +1,11 @@
-export type CardCategory = 'equipamentos' | 'infraestrutura' | 'mobilidade' | 'riscos' | 'seguranca';
+export type CardCategory =
+  | 'equipamentos'
+  | 'infraestrutura'
+  | 'mobilidade'
+  | 'riscos'
+  | 'seguranca'
+  | 'tipologia'
+  | 'mudanca';
 
 export interface CardDef {
   id: string;
@@ -12,6 +19,8 @@ export const CATEGORY_LABELS: Record<CardCategory, string> = {
   mobilidade: 'Mobilidade',
   riscos: 'Riscos',
   seguranca: 'Segurança',
+  tipologia: 'Tipologia da moradia',
+  mudanca: 'Como mudar',
 };
 
 export const CATEGORY_COLORS: Record<CardCategory, string> = {
@@ -20,6 +29,8 @@ export const CATEGORY_COLORS: Record<CardCategory, string> = {
   mobilidade: '#f2a93b',
   riscos: '#c53d3d',
   seguranca: '#6b4f3a',
+  tipologia: '#7c5cbf',
+  mudanca: '#d98324',
 };
 
 // Mantido em paridade com formulario/src/data/cards.ts (sem as imagens, que só existem no app do formulário).
@@ -44,6 +55,13 @@ export const CARDS: CardDef[] = [
   { id: 'contencao', label: 'Contenção de Encostas', category: 'riscos' },
   { id: 'enchente', label: 'Enchente', category: 'riscos' },
   { id: 'seguranca', label: 'Segurança', category: 'seguranca' },
+  { id: 'tipologia-ocupacao', label: 'Ocupação / Acampamento', category: 'tipologia' },
+  { id: 'tipologia-encosta', label: 'Autoconstrução em encosta', category: 'tipologia' },
+  { id: 'tipologia-apartamento', label: 'Apartamento (conjunto habitacional)', category: 'tipologia' },
+  { id: 'tipologia-rural', label: 'Casa rural / sítio', category: 'tipologia' },
+  { id: 'tipologia-casa-propria', label: 'Casa própria consolidada', category: 'tipologia' },
+  { id: 'mudanca-casa-nova', label: 'Casa Nova', category: 'mudanca' },
+  { id: 'mudanca-reforma', label: 'Reforma', category: 'mudanca' },
 ];
 
 export function getCard(id: string): CardDef | undefined {

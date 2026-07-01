@@ -7,9 +7,9 @@
   --color-ink-soft: #6b4f3a;
   --color-ink-faint: #9a8268;
 
-  --color-primary: #e2298c;
-  --color-primary-dark: #ad1f6c;
-  --color-primary-soft: #f6c1de;
+  --color-primary: #dc2f2f;
+  --color-primary-dark: #a81f1f;
+  --color-primary-soft: #f5c3c0;
 
   --color-secondary: #2fa9b8;
   --color-secondary-dark: #1f7a86;
@@ -22,8 +22,8 @@
   --color-success: #3f9142;
   --color-danger: #c53d3d;
 
-  --font-heading: 'Baloo 2', 'Nunito', sans-serif;
-  --font-body: 'Nunito', sans-serif;
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
 
   --radius-sm: 10px;
   --radius-md: 18px;
@@ -125,6 +125,49 @@ a {
 
 .btn-block {
   width: 100%;
+}
+
+.btn-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(59, 42, 32, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal-box {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 28px 32px;
+  max-width: 90vw;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-ink);
+  white-space: nowrap;
 }
 
 .card-surface {

@@ -1,10 +1,14 @@
 import { useAuth } from '../../auth/AuthContext';
 
-export function GameHeader({ stepLabel }: { stepLabel: string }) {
+export function GameHeader(_props: { stepLabel?: string }) {
   const { user, logout } = useAuth();
+  const firstName = user?.name?.trim().split(/\s+/)[0] ?? '';
+
+  const infoPillStyle = { padding: '8px 16px', fontSize: '0.85rem', cursor: 'default' } as const;
 
   return (
     <header
+      className="game-header"
       style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -12,26 +16,24 @@ export function GameHeader({ stepLabel }: { stepLabel: string }) {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '16px 24px',
-        background: 'var(--color-surface)',
-        borderBottom: '3px solid var(--color-ink)',
+        background: 'transparent',
       }}
     >
-      <div>
-        <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'var(--color-primary-dark)' }}>
-          PLANEHAB · Nosso Bairro
+      {user ? (
+        <div
+          className="game-header-info"
+          style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}
+        >
+          <span className="btn btn-ghost" style={infoPillStyle}>{firstName}</span>
+          <span className="btn btn-ghost" style={infoPillStyle}>{user.entity}</span>
+          <span className="btn btn-ghost" style={infoPillStyle}>{user.city}</span>
         </div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--color-ink-soft)' }}>{stepLabel}</div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {user && (
-          <span className="badge">
-            {user.name} · {user.entity} · {user.city}
-          </span>
-        )}
-        <button className="btn btn-ghost" type="button" onClick={logout} style={{ padding: '8px 16px' }}>
-          Sair
-        </button>
-      </div>
+      ) : (
+        <span />
+      )}
+      <button className="btn btn-ghost" type="button" onClick={logout} style={{ padding: '8px 16px' }}>
+        Sair
+      </button>
     </header>
   );
 }

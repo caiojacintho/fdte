@@ -5,7 +5,6 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { TabuleiroPage } from './pages/TabuleiroPage';
-import { PainelPage } from './pages/PainelPage';
 import { ResumoPage } from './pages/ResumoPage';
 
 export default function App() {
@@ -31,14 +30,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/jogo/painel"
-            element={
-              <ProtectedRoute>
-                <PainelPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/jogo/painel" element={<Navigate to="/jogo/tabuleiro" replace />} />
           <Route
             path="/resumo"
             element={

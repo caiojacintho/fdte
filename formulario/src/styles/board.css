@@ -16,14 +16,12 @@
 }
 
 .draggable-card {
-  width: 84px;
-  height: 84px;
+  width: 150px;
+  height: auto;
   border-radius: var(--radius-sm);
   background: white;
   border: 2px solid var(--color-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   cursor: grab;
   overflow: hidden;
   position: relative;
@@ -38,8 +36,9 @@
 
 .draggable-card img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .draggable-card .card-label {
@@ -49,11 +48,11 @@
   right: 0;
   background: rgba(59, 42, 32, 0.78);
   color: white;
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   font-family: var(--font-heading);
   text-align: center;
-  padding: 2px 2px;
-  line-height: 1.1;
+  padding: 4px 4px;
+  line-height: 1.15;
 }
 
 .draggable-card.dragging {
@@ -61,6 +60,171 @@
 }
 
 /* --- Slots: tabuleiro --- */
+
+.board-card {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink-soft);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.tabuleiro-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tabuleiro-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabuleiro-content > .board-columns {
+  flex: 1;
+  min-height: 0;
+}
+
+.board-columns {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+
+.board-left-col {
+  flex: 1 1 210px;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.board-drop {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.tabuleiro-board.board-drop {
+  background: var(--color-paper);
+  border: 3px dashed var(--color-ink-soft);
+  border-radius: var(--radius-lg);
+  padding: 0 24px;
+  box-shadow: var(--shadow-card);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.board-drop-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-cards {
+  flex: 3.4 1 480px;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 34px;
+}
+
+.board-cards .tray {
+  flex: 1;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 32px 6px 32px 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-soft) transparent;
+}
+
+.board-cards .tray::-webkit-scrollbar {
+  width: 10px;
+}
+
+.board-cards .tray::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.board-cards .tray::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 14px 0;
+}
+
+.board-cards .tray::-webkit-scrollbar-thumb {
+  background: var(--color-ink-soft);
+  border-radius: 999px;
+}
+
+.board-cards .draggable-card {
+  width: 240px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+/* Na Etapa 2 (Painel) as artes já trazem o nome, então o rótulo da bandeja é ocultado
+   (o nome continua aparecendo na lista de cartas selecionadas, via .precisa-item-label). */
+.painel-page .board-cards .card-label {
+  display: none;
+}
+
+.drag-preview {
+  width: 240px;
+  height: auto;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.board-cards .card-label {
+  position: static;
+  display: block;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 0.95rem;
+  line-height: 1.2;
+  padding: 8px 4px 0;
+}
+
+.board-drop-slot {
+  width: auto;
+  max-width: none;
+}
+
+.board-drop-slot .slot-rect {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  border: none;
+  background: transparent;
+}
+
+.board-drop .slot-card {
+  width: 260px;
+  max-width: 100%;
+  flex: 0 0 auto;
+}
 
 .tabuleiro-board {
   position: relative;
@@ -99,6 +263,159 @@
   }
 }
 
+.precisa-zone {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 56px 6px 32px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-soft) transparent;
+}
+
+.precisa-zone::-webkit-scrollbar {
+  width: 10px;
+}
+
+.precisa-zone::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.precisa-zone::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 14px 0;
+}
+
+.precisa-zone::-webkit-scrollbar-thumb {
+  background: var(--color-ink-soft);
+  border-radius: 999px;
+}
+
+.precisa-zone > .slot-placeholder {
+  margin: auto;
+}
+
+.precisa-zone.over {
+  background: var(--color-secondary-soft);
+  border-radius: var(--radius-md);
+}
+
+.precisa-counter {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--color-ink-soft);
+  z-index: 2;
+}
+
+.precisa-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  background: var(--color-surface);
+  border: 2px solid var(--color-ink-soft);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+}
+
+.precisa-item-order {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-ink-soft);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.78rem;
+  z-index: 3;
+}
+
+.precisa-item-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 0 0 auto;
+}
+
+.precisa-arrow {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.precisa-arrow-icon {
+  width: 13px;
+  height: 11px;
+  display: block;
+}
+
+.precisa-arrow-icon path {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+}
+
+.precisa-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.precisa-item img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex: 0 0 auto;
+}
+
+.precisa-item-label {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1.15;
+}
+
+.precisa-item-remove {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .slot-rect,
 .slot-circle {
   background: white;
@@ -132,6 +449,52 @@
 .slot-rect.filled,
 .slot-circle.filled {
   border-style: solid;
+}
+
+.board-drop .slot-rect,
+.board-drop .slot-circle {
+  border: none;
+  background: transparent;
+  position: static;
+  width: auto;
+  height: auto;
+  min-height: 0;
+}
+
+.board-drop .slot-card {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.board-drop .slot-card img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.board-drop .slot-card .card-label {
+  position: static;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 0.95rem;
+  line-height: 1.2;
+  padding: 8px 4px 0;
+  text-align: center;
+  border-radius: 0;
+}
+
+.board-drop .slot-card .remove-btn {
+  top: 10px;
+  right: 10px;
+  width: 42px;
+  height: 42px;
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0;
+  border: none;
 }
 
 .slot-placeholder {
@@ -271,4 +634,78 @@
   justify-content: center;
   cursor: pointer;
   z-index: 2;
+}
+
+/* ============ Versão mobile: empilha tudo e usa clique (sem drag) ============ */
+@media (max-width: 768px) {
+  .tabuleiro-page {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .tabuleiro-content > .board-columns {
+    flex: none;
+    min-height: 0;
+  }
+
+  .board-columns {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .board-left-col,
+  .board-cards {
+    flex: none;
+    min-height: 0;
+  }
+
+  /* Sem scroll interno no mobile — a página inteira rola */
+  .board-cards .tray {
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .precisa-zone {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .board-drop {
+    min-height: 180px;
+  }
+
+  /* Card clicável (sem drag): cursor de clique e toque livre para rolar a página */
+  .draggable-card.selectable {
+    cursor: pointer;
+    touch-action: auto;
+  }
+
+  /* No mobile, ocultar as pills de nome/entidade/cidade (mantém só o botão Sair) */
+  .game-header-info {
+    display: none !important;
+  }
+
+  /* Sair encostado no canto direito */
+  .game-header > button {
+    margin-left: auto;
+  }
+
+  /* O texto do modal pode quebrar em várias linhas na tela estreita */
+  .modal-text {
+    white-space: normal;
+  }
+
+  /* Respiro acima e abaixo do card dentro da área de drop */
+  .tabuleiro-board.board-drop {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}
+
+.draggable-card.selectable {
+  touch-action: auto;
+  cursor: pointer;
 }

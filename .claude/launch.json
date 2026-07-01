@@ -5,7 +5,8 @@
       "name": "formulario",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "formulario", "run", "dev"],
-      "port": 5173
+      "port": 5173,
+      "autoPort": true
     },
     {
       "name": "admin",
