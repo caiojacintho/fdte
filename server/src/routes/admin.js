@@ -8,7 +8,7 @@ adminRouter.get('/submissions', (req, res) => {
 
   let sql = `
     SELECT s.id, s.status, s.created_at, s.updated_at, s.completed_at,
-           u.name, u.email, u.entity, u.city
+           u.name, u.email, u.entity, u.city, u.cpf
     FROM submissions s
     JOIN users u ON u.id = s.user_id
     WHERE 1=1
@@ -36,7 +36,7 @@ adminRouter.get('/submissions', (req, res) => {
 adminRouter.get('/submissions/:id', (req, res) => {
   const submission = db
     .prepare(
-      `SELECT s.*, u.name, u.email, u.entity, u.city
+      `SELECT s.*, u.name, u.email, u.entity, u.city, u.cpf
        FROM submissions s JOIN users u ON u.id = s.user_id
        WHERE s.id = ?`
     )

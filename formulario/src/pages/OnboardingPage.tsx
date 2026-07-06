@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { BrandHeader } from '../components/layout/BrandHeader';
 
 interface Slide {
   title: string;
   body: string;
-  bullets?: string[];
 }
 
 const SLIDES: Slide[] = [
@@ -14,48 +14,49 @@ const SLIDES: Slide[] = [
       'Esta é a Consulta Popular da Habitação do PLANEHAB. Sua opinião vai ajudar o Governo do Estado da Bahia a entender, na prática, como sua moradia e seu bairro são hoje e o que precisam para melhorar. Tudo o que você responder aqui é registrado e analisado pelos gestores responsáveis pelas políticas de habitação.',
   },
   {
-    title: 'Um jogo, duas etapas',
+    title: 'Um jogo em 4 etapas',
     body:
-      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste cartas com imagens para os espaços indicados, igual a um tabuleiro de mesa. O jogo tem duas etapas: primeiro o tabuleiro da sua casa, depois o do seu bairro.',
+      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste cartas com imagens para os espaços indicados, igual a um tabuleiro de mesa. São 4 etapas no total — 3 sobre a sua casa e 1 sobre o seu bairro.',
   },
   {
-    title: 'Etapa 1 — O tabuleiro da minha casa',
-    body: 'Aqui você responde em 3 passos:',
-    bullets: [
-      'Como é hoje — escolha a carta que melhor representa a situação atual da sua moradia;',
-      'Como mudar — escolha a carta que representa a mudança mais importante para você;',
-      'O que minha casa precisa — escolha até 12 cartas com os itens que sua casa mais precisa.',
-    ],
+    title: 'Sobre a sua casa — 3 etapas',
+    body:
+      'As três primeiras etapas são sobre a sua moradia: (1) Como é hoje — escolha 1 carta que representa como é a sua casa atualmente; (2) O que mudar — escolha 1 carta com a mudança mais importante para você; (3) O que a casa precisa — escolha até 12 cartas com o que a sua casa mais precisa.',
   },
   {
-    title: 'Etapa 2 — O painel Nosso Bairro',
+    title: 'Sobre o seu bairro — 1 etapa',
     body:
-      'Depois do tabuleiro da casa, você preenche o painel em formato de colmeia do seu bairro, arrastando cartas de equipamentos públicos, infraestrutura, mobilidade, segurança e riscos para os espaços hexagonais — mostrando o que falta e o que é prioridade onde você mora.',
+      'Na última etapa, você mostra o que o seu bairro precisa: arraste cartas de equipamentos públicos, infraestrutura, mobilidade, segurança e riscos para o painel em formato de colmeia, indicando o que falta e o que é prioridade onde você mora.',
   },
   {
     title: 'Como jogar',
     body:
-      'No computador, clique e arraste as cartas até o espaço desejado. No celular ou tablet, toque e segure a carta para arrastá-la. Para remover uma carta de um espaço, toque nela e depois no "×" que aparece. Você pode salvar e continuar depois — suas respostas ficam guardadas automaticamente.',
+      'No computador, clique e arraste as cartas até o espaço desejado. No celular ou tablet, basta tocar na carta para selecioná-la e colocá-la no espaço. Para remover uma carta de um espaço, basta clicar no "×". Você pode salvar e continuar depois — suas respostas ficam guardadas automaticamente.',
   },
 ];
 
 export function OnboardingPage() {
-  const [index, setIndex] = useState(0);
+  const location = useLocation();
+  const startAtLast = (location.state as { startAtLast?: boolean } | null)?.startAtLast;
+  const [index, setIndex] = useState(startAtLast ? SLIDES.length - 1 : 0);
   const navigate = useNavigate();
   const slide = SLIDES[index];
   const isLast = index === SLIDES.length - 1;
 
   return (
-    <div
-      style={{
-        minHeight: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-      }}
-    >
-      <div className="card-surface" style={{ maxWidth: 560, width: '100%', padding: '40px 36px' }}>
+    // Layout: header de marca no topo + card centralizado abaixo.
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+      <BrandHeader />
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px 24px 64px',
+        }}
+      >
+        <div className="card-surface" style={{ maxWidth: 560, width: '100%', padding: '40px 36px' }}>
         <div
           style={{
             display: 'flex',
@@ -81,36 +82,9 @@ export function OnboardingPage() {
         <h1 style={{ fontSize: '1.6rem', color: 'var(--color-primary-dark)', marginBottom: 16, textAlign: 'center' }}>
           {slide.title}
         </h1>
-        <div style={{ minHeight: 140 }}>
-          <p
-            style={{
-              color: 'var(--color-ink-soft)',
-              fontSize: '1.05rem',
-              textAlign: 'center',
-              marginBottom: slide.bullets ? 12 : 0,
-            }}
-          >
-            {slide.body}
-          </p>
-          {slide.bullets && (
-            <ul
-              style={{
-                color: 'var(--color-ink-soft)',
-                fontSize: '1.05rem',
-                textAlign: 'left',
-                margin: 0,
-                paddingLeft: 24,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-              }}
-            >
-              {slide.bullets.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <p style={{ color: 'var(--color-ink-soft)', fontSize: '1.05rem', textAlign: 'center', minHeight: 140 }}>
+          {slide.body}
+        </p>
 
         {index === 0 ? (
           <div style={{ marginTop: 28 }}>
@@ -124,7 +98,7 @@ export function OnboardingPage() {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28, gap: 12 }}>
+          <div className="onboarding-nav">
             <button
               className="btn btn-ghost"
               type="button"
@@ -141,6 +115,7 @@ export function OnboardingPage() {
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

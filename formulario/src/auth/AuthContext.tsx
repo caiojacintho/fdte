@@ -5,7 +5,7 @@ interface AuthContextValue {
   user: UserDTO | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (payload: { name: string; email: string; password: string; entity: string; city: string }) => Promise<void>;
+  register: (payload: { name: string; email: string; password: string; entity: string; city: string; cpf: string }) => Promise<void>;
   logout: () => void;
 }
 
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(user);
   }
 
-  async function register(payload: { name: string; email: string; password: string; entity: string; city: string }) {
+  async function register(payload: { name: string; email: string; password: string; entity: string; city: string; cpf: string }) {
     const { token, user } = await api.register(payload);
     localStorage.setItem('fdte_token', token);
     setUser(user);

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AuthLayout } from '../components/layout/AuthLayout';
+import { BrandHeader } from '../components/layout/BrandHeader';
 import { ApiError } from '../api/client';
 
 export function LoginPage() {
@@ -27,7 +28,7 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Nosso Bairro" subtitle="Consulta Popular da Habitação">
+    <AuthLayout title="Consulta Popular da Habitação" header={<BrandHeader />}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div className="field">
           <label htmlFor="email">E-mail</label>

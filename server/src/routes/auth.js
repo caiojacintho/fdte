@@ -11,18 +11,23 @@ function publicUser(user) {
     email: user.email,
     entity: user.entity,
     city: user.city,
+    cpf: user.cpf ?? '',
     role: user.role,
   };
 }
 
 authRouter.post('/register', (req, res) => {
-  const { name, email, password, entity, city } = req.body || {};
+  const { name, email, password, entity, city, cpf } = req.body || {};
 
-  if (!name || !email || !password || !entity || !city) {
-    return res.status(400).json({ error: 'Preencha nome, e-mail, senha, entidade e cidade.' });
+  if (!name || !email || !password || !entity || !city || !cpf) {
+    return res.status(400).json({ error: 'Preencha nome, e-mail, senha, entidade, cidade e CPF.' });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres.' });
+  }
+  const cpfDigits = String(cpf).replace(/\D/g, '');
+  if (cpfDigits.length !== 11) {
+    return res.status(400).json({ error: 'CPF inválido. Informe os 11 dígitos.' });
   }
 
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
@@ -33,10 +38,10 @@ authRouter.post('/register', (req, res) => {
   const hash = hashPassword(password);
   const info = db
     .prepare(
-      `INSERT INTO users (name, email, password_hash, entity, city, role)
-       VALUES (?, ?, ?, ?, ?, 'user')`
+      `INSERT INTO users (name, email, password_hash, entity, city, cpf, role)
+       VALUES (?, ?, ?, ?, ?, ?, 'user')`
     )
-    .run(name.trim(), email.toLowerCase().trim(), hash, entity.trim(), city.trim());
+    .run(name.trim(), email.toLowerCase().trim(), hash, entity.trim(), city.trim(), cpfDigits);
 
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
   const token = signToken(user);

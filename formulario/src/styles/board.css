@@ -96,7 +96,7 @@
 }
 
 .board-left-col {
-  flex: 1 1 210px;
+  flex: 0 0 320px;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -179,7 +179,7 @@
   border: none;
   background: transparent;
   box-shadow: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* Na Etapa 2 (Painel) as artes já trazem o nome, então o rótulo da bandeja é ocultado
@@ -198,13 +198,18 @@
 }
 
 .board-cards .card-label {
-  position: static;
-  display: block;
-  background: transparent;
-  color: var(--color-ink);
-  font-size: 0.95rem;
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  background: rgba(48, 19, 10, 0.82);
+  color: white;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
   line-height: 1.2;
-  padding: 8px 4px 0;
+  text-align: center;
+  padding: 9px 8px;
+  border-radius: 8px;
 }
 
 .board-drop-slot {
@@ -267,11 +272,11 @@
   position: relative;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 56px 6px 32px 14px;
+  padding: 56px 16px 32px 14px;
   scrollbar-width: thin;
   scrollbar-color: var(--color-ink-soft) transparent;
 }
@@ -393,6 +398,7 @@
 
 .precisa-item-label {
   flex: 1;
+  min-width: 0;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-ink);
@@ -400,7 +406,9 @@
 }
 
 .precisa-item-remove {
-  flex: 0 0 auto;
+  position: absolute;
+  top: -10px;
+  right: -10px;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -476,14 +484,18 @@
 }
 
 .board-drop .slot-card .card-label {
-  position: static;
-  background: transparent;
-  color: var(--color-ink);
-  font-size: 0.95rem;
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  background: rgba(48, 19, 10, 0.82);
+  color: white;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
   line-height: 1.2;
-  padding: 8px 4px 0;
+  padding: 9px 8px;
   text-align: center;
-  border-radius: 0;
+  border-radius: 8px;
 }
 
 .board-drop .slot-card .remove-btn {
@@ -493,7 +505,8 @@
   height: 42px;
   font-size: 1.6rem;
   line-height: 1;
-  padding: 0;
+  padding: 0 0 4px;
+  box-sizing: border-box;
   border: none;
 }
 
@@ -636,6 +649,98 @@
   z-index: 2;
 }
 
+/* ============ Header do jogo (logos à esquerda, info ao centro, ações à direita) ============ */
+.game-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-header-logos {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.game-header-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.game-header-actions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* O hambúrguer só aparece no mobile (ativado na media query) */
+.game-header-hamburger {
+  display: none;
+  padding: 8px 12px;
+}
+
+.game-header-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.game-header-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 220px;
+  padding: 18px;
+  background: var(--color-paper);
+  border: 3px solid #30130a;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.game-header-menu-logos {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.game-header-menu-info {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.game-header-menu-info .btn {
+  text-align: center;
+}
+
+.game-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Em telas muito estreitas os botões empilham: "Próximo passo" em cima, "Voltar" embaixo. */
+@media (max-width: 460px) {
+  .game-nav {
+    flex-direction: column-reverse;
+  }
+  .game-nav .btn {
+    width: 100%;
+  }
+}
+
 /* ============ Versão mobile: empilha tudo e usa clique (sem drag) ============ */
 @media (max-width: 768px) {
   .tabuleiro-page {
@@ -660,11 +765,13 @@
     min-height: 0;
   }
 
-  /* Sem scroll interno no mobile — a página inteira rola */
+  /* Sem scroll interno no mobile — a página inteira rola; cartas centralizadas */
   .board-cards .tray {
     overflow: visible;
     -webkit-mask-image: none;
     mask-image: none;
+    justify-content: center;
+    padding: 24px 0;
   }
 
   .precisa-zone {
@@ -673,8 +780,13 @@
     overflow: visible;
   }
 
+  /* Vazia (sem cartas, só o placeholder), o card fica compacto como o da etapa de carta única */
+  .precisa-zone:has(> .slot-placeholder) {
+    padding: 12px;
+  }
+
   .board-drop {
-    min-height: 180px;
+    min-height: 0;
   }
 
   /* Card clicável (sem drag): cursor de clique e toque livre para rolar a página */
@@ -683,14 +795,16 @@
     touch-action: auto;
   }
 
-  /* No mobile, ocultar as pills de nome/entidade/cidade (mantém só o botão Sair) */
-  .game-header-info {
+  /* No mobile as pills e o Sair somem do header — vão para o menu hambúrguer */
+  .game-header-info,
+  .game-header-sair {
     display: none !important;
   }
 
-  /* Sair encostado no canto direito */
-  .game-header > button {
-    margin-left: auto;
+  .game-header-hamburger {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
   }
 
   /* O texto do modal pode quebrar em várias linhas na tela estreita */
@@ -700,12 +814,74 @@
 
   /* Respiro acima e abaixo do card dentro da área de drop */
   .tabuleiro-board.board-drop {
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 }
 
 .draggable-card.selectable {
   touch-action: auto;
   cursor: pointer;
+}
+
+/*
+ * Etapa de slot único ("Como é hoje"): a carta escala de forma fluida com o
+ * tamanho da caixa em que está inserida — cresce e encolhe conforme a tela —
+ * limitada pela largura do container e pela altura da viewport, sem transbordar.
+ */
+.board-drop-slot,
+.board-drop-slot .slot-rect {
+  width: 100%;
+  min-height: 0;
+}
+
+.board-drop-slot .slot-card {
+  width: auto;
+  max-width: 100%;
+  min-height: 0;
+  position: relative;
+  border-radius: var(--radius-md);
+}
+
+/* "×" cruzando a quina superior direita do card (metade dentro, metade fora). */
+.board-drop-slot .slot-card .remove-btn {
+  top: -14px;
+  right: -14px;
+}
+
+.board-drop-slot .slot-card img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 46vh;
+  object-fit: contain;
+}
+
+/*
+ * Etapa "Como mudar" (cartas redondas): as artes já trazem o nome embutido,
+ * então o rótulo de texto é redundante e fica oculto — tanto nas cartas da
+ * bandeja quanto na carta selecionada.
+ */
+.step-como_mudar .board-cards .card-label,
+.step-como_mudar .board-drop .slot-card .card-label {
+  display: none;
+}
+
+/* A carta redonda selecionada escala para caber dentro da área tracejada. */
+.step-como_mudar .board-drop .slot-circle {
+  width: 100%;
+  max-width: 260px;
+}
+
+.step-como_mudar .board-drop .slot-card {
+  width: 100%;
+}
+
+.step-como_mudar .board-drop .slot-card img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 42vh;
+  object-fit: contain;
 }

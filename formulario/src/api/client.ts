@@ -26,7 +26,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  register: (payload: { name: string; email: string; password: string; entity: string; city: string }) =>
+  register: (payload: {
+    name: string;
+    email: string;
+    password: string;
+    entity: string;
+    city: string;
+    cpf: string;
+  }) =>
     request<{ token: string; user: UserDTO }>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -58,6 +65,7 @@ export interface UserDTO {
   email: string;
   entity: string;
   city: string;
+  cpf: string;
   role: 'user' | 'admin';
 }
 

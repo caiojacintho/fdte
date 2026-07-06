@@ -7,9 +7,9 @@
   --color-ink-soft: #6b4f3a;
   --color-ink-faint: #9a8268;
 
-  --color-primary: #dc2f2f;
-  --color-primary-dark: #a81f1f;
-  --color-primary-soft: #f5c3c0;
+  --color-primary: #bf6632;
+  --color-primary-dark: #934c22;
+  --color-primary-soft: #eacbb4;
 
   --color-secondary: #2fa9b8;
   --color-secondary-dark: #1f7a86;
@@ -118,13 +118,30 @@ a {
 }
 
 .btn-ghost {
-  background: transparent;
+  background: var(--color-primary-soft);
   color: var(--color-ink);
   border-color: var(--color-ink);
 }
 
 .btn-block {
   width: 100%;
+}
+
+.onboarding-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+/* Em telas estreitas os botões empilham: "Próximo" em cima, "Voltar" embaixo. */
+@media (max-width: 460px) {
+  .onboarding-nav {
+    flex-direction: column-reverse;
+  }
+  .onboarding-nav .btn {
+    width: 100%;
+  }
 }
 
 .btn-locked {
@@ -199,6 +216,24 @@ a {
   padding: 12px 14px;
   font-size: 1rem;
   background: white;
+  color: var(--color-ink);
+}
+
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23757575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+/* Enquanto nenhuma opção válida está selecionada (required + opção vazia), o texto fica cinza como um placeholder. */
+.field select:invalid {
+  color: rgb(117, 117, 117);
+}
+
+.field select option {
   color: var(--color-ink);
 }
 

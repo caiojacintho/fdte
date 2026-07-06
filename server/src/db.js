@@ -42,6 +42,12 @@ db.exec(`
   );
 `);
 
+// Migração: adiciona a coluna cpf em bancos já existentes (CREATE TABLE IF NOT EXISTS não altera colunas).
+const userColumns = db.prepare('PRAGMA table_info(users)').all();
+if (!userColumns.some((c) => c.name === 'cpf')) {
+  db.exec("ALTER TABLE users ADD COLUMN cpf TEXT NOT NULL DEFAULT ''");
+}
+
 function seedAdmin() {
   const existing = db.prepare('SELECT id FROM users WHERE role = ?').get('admin');
   if (existing) return;

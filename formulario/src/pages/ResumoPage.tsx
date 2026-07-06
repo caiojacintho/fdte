@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameHeader } from '../components/layout/GameHeader';
 import { useSubmission } from '../submission/SubmissionContext';
-import { getCard } from '../data/cards';
+import { getCard, getPainelCard } from '../data/cards';
 import {
   TABULEIRO_BOARD,
   PAINEL_BOARD,
@@ -12,8 +12,8 @@ import {
   PAINEL_SLOTS,
 } from '../data/boardLayout';
 
-function MiniCard({ cardId }: { cardId: string | null }) {
-  const card = getCard(cardId);
+function MiniCard({ cardId, painel }: { cardId: string | null; painel?: boolean }) {
+  const card = painel ? getPainelCard(cardId) : getCard(cardId);
   if (!card) {
     return (
       <div
@@ -31,7 +31,7 @@ function MiniCard({ cardId }: { cardId: string | null }) {
       src={card.image}
       alt={card.label}
       title={card.label}
-      style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover', border: '2px solid var(--color-ink)' }}
+      style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover' }}
     />
   );
 }
@@ -45,8 +45,6 @@ export function ResumoPage() {
   if (loading) return <p style={{ padding: 24 }}>Carregando...</p>;
 
   const isCompleted = submission?.status === 'completed';
-  const precisaCount = PRECISA_SLOTS.filter((s) => getPlacedCardId(TABULEIRO_BOARD, s.key)).length;
-  const painelCount = PAINEL_SLOTS.filter((s) => getPlacedCardId(PAINEL_BOARD, s.key)).length;
 
   async function handleSubmit() {
     setError(null);
@@ -73,34 +71,133 @@ export function ResumoPage() {
           </div>
         )}
 
-        <h2 style={{ color: 'var(--color-primary-dark)', marginBottom: 16 }}>Tabuleiro da minha casa</h2>
-        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 8 }}>
-          <div>
-            <p style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', marginBottom: 6 }}>Como é hoje</p>
-            <MiniCard cardId={getPlacedCardId(TABULEIRO_BOARD, COMO_E_HOJE_SLOT.key)} />
-          </div>
-          <div>
-            <p style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', marginBottom: 6 }}>Como mudar</p>
-            <MiniCard cardId={getPlacedCardId(TABULEIRO_BOARD, COMO_MUDAR_SLOT.key)} />
+        <h2 style={{ color: 'var(--color-primary-dark)', marginBottom: 16 }}>Revise suas respostas</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+          {[
+            { label: 'Como é hoje', cardId: getPlacedCardId(TABULEIRO_BOARD, COMO_E_HOJE_SLOT.key), step: 0 },
+            { label: 'Como mudar', cardId: getPlacedCardId(TABULEIRO_BOARD, COMO_MUDAR_SLOT.key), step: 1 },
+          ].map(({ label, cardId, step }) => {
+            const card = getCard(cardId);
+            return (
+              <div
+                key={label}
+                className="card-surface"
+                style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 16px' }}
+              >
+                {card ? (
+                  <img
+                    src={card.image}
+                    alt={card.label}
+                    style={{
+                      height: 76,
+                      width: 'auto',
+                      maxWidth: 72,
+                      borderRadius: 8,
+                      objectFit: 'contain',
+                    }}
+                  />
+                ) : (
+                  <MiniCard cardId={null} />
+                )}
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    gap: 2,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: '0.8rem',
+                      color: 'var(--color-ink-faint)',
+                      margin: 0,
+                    }}
+                  >
+                    {label}
+                  </p>
+                  <strong style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-ink)' }}>
+                    {card?.label ?? '—'}
+                  </strong>
+                </div>
+                {!isCompleted && (
+                  <div style={{ display: 'flex', alignItems: 'center', paddingRight: 16 }}>
+                    <button
+                      className="btn btn-ghost"
+                      type="button"
+                      style={{ padding: '8px 16px' }}
+                      onClick={() => navigate('/jogo/tabuleiro', { state: { stepIndex: step } })}
+                    >
+                      Editar
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="card-surface" style={{ padding: 16, marginBottom: 24, position: 'relative' }}>
+          {!isCompleted && (
+            <button
+              className="btn btn-ghost"
+              type="button"
+              style={{ position: 'absolute', top: 16, right: 16, padding: '8px 16px' }}
+              onClick={() => navigate('/jogo/tabuleiro', { state: { stepIndex: 2 } })}
+            >
+              Editar
+            </button>
+          )}
+          <p
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.8rem',
+              color: 'var(--color-ink-faint)',
+              margin: '0 0 12px',
+            }}
+          >
+            O que minha casa precisa
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {PRECISA_SLOTS.map((s) => getPlacedCardId(TABULEIRO_BOARD, s.key))
+              .filter((id): id is string => Boolean(id))
+              .map((cardId, i) => (
+                <MiniCard key={i} cardId={cardId} />
+              ))}
           </div>
         </div>
 
-        <p style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', margin: '16px 0 6px' }}>
-          O que minha casa precisa ({precisaCount}/12)
-        </p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
-          {PRECISA_SLOTS.map((s) => (
-            <MiniCard key={s.key} cardId={getPlacedCardId(TABULEIRO_BOARD, s.key)} />
-          ))}
-        </div>
-
-        <h2 style={{ color: 'var(--color-primary-dark)', marginBottom: 16 }}>
-          Painel Nosso Bairro ({painelCount}/13)
-        </h2>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
-          {PAINEL_SLOTS.map((s) => (
-            <MiniCard key={s.key} cardId={getPlacedCardId(PAINEL_BOARD, s.key)} />
-          ))}
+        <div className="card-surface" style={{ padding: 16, marginBottom: 32, position: 'relative' }}>
+          {!isCompleted && (
+            <button
+              className="btn btn-ghost"
+              type="button"
+              style={{ position: 'absolute', top: 16, right: 16, padding: '8px 16px' }}
+              onClick={() => navigate('/jogo/tabuleiro', { state: { stepIndex: 3 } })}
+            >
+              Editar
+            </button>
+          )}
+          <p
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.8rem',
+              color: 'var(--color-ink-faint)',
+              margin: '0 0 12px',
+            }}
+          >
+            O que o meu bairro precisa
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {PAINEL_SLOTS.map((s) => getPlacedCardId(PAINEL_BOARD, s.key))
+              .filter((id): id is string => Boolean(id))
+              .map((cardId, i) => (
+                <MiniCard key={i} painel cardId={cardId} />
+              ))}
+          </div>
         </div>
 
         {error && <p className="error-text">{error}</p>}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DndContext, DragOverlay, useDroppable, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { GameHeader } from '../components/layout/GameHeader';
 import { CardTray } from '../components/dnd/CardTray';
@@ -64,14 +64,14 @@ const STEPS: StepDef[] = [
   },
   {
     key: 'precisa',
-    instructions: 'Escolha até 12 cartas com o que a sua casa mais precisa',
+    instructions: 'Escolha até 12 cartas com o que a sua casa mais precisa, em ordem de importância',
     board: TABULEIRO_BOARD,
     kind: 'list',
     slots: PRECISA_SLOTS,
   },
   {
     key: 'painel',
-    instructions: 'Arraste as cartas mostrando o que o seu bairro precisa',
+    instructions: 'Escolha as cartas mostrando o que o seu bairro precisa',
     board: PAINEL_BOARD,
     kind: 'list',
     slots: PAINEL_SLOTS,
@@ -161,10 +161,14 @@ function ListDropZone({
 
 export function TabuleiroPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { submission, getCard: getPlacedCardId, setCard, loading } = useSubmission();
   const sensors = useBoardSensors();
   const isMobile = useIsMobile();
-  const [stepIndex, setStepIndex] = useState(0);
+  const requestedStep = (location.state as { stepIndex?: number } | null)?.stepIndex;
+  const [stepIndex, setStepIndex] = useState(
+    typeof requestedStep === 'number' ? Math.min(Math.max(requestedStep, 0), STEPS.length - 1) : 0
+  );
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [showRequired, setShowRequired] = useState(false);
 
@@ -194,6 +198,10 @@ export function TabuleiroPage() {
     step.kind === 'list'
       ? (step.slots ?? []).some((s) => getPlacedCardId(step.board, s.key))
       : Boolean(getPlacedCardId(step.board, step.slot!));
+
+  // No mobile, nas etapas de carta única, ocultamos as demais opções depois que o usuário escolhe uma
+  // (fica visível só a carta selecionada + os botões de navegação).
+  const hideTray = isMobile && step.kind !== 'list' && stepHasCard;
 
   function handleNext() {
     if (!stepHasCard) {
@@ -256,7 +264,7 @@ export function TabuleiroPage() {
     step.kind !== 'list' ? lookupCard(getPlacedCardId(step.board, step.slot!)) ?? undefined : undefined;
 
   return (
-    <div className={`tabuleiro-page${isPainel ? ' painel-page' : ''}`}>
+    <div className={`tabuleiro-page step-${step.key}${isPainel ? ' painel-page' : ''}`}>
       <GameHeader stepLabel={`Passo ${stepIndex + 1} de ${STEPS.length}`} />
 
       <div className="tabuleiro-content" style={{ padding: '20px 24px 16px' }}>
@@ -307,9 +315,11 @@ export function TabuleiroPage() {
               </div>
             </div>
 
-            <div className="board-cards board-card">
-              <CardTray cards={availableCards} onSelect={isMobile ? selectCard : undefined} />
-            </div>
+            {!hideTray && (
+              <div className="board-cards board-card">
+                <CardTray cards={availableCards} onSelect={isMobile ? selectCard : undefined} />
+              </div>
+            )}
           </div>
 
           <DragOverlay>
@@ -321,12 +331,15 @@ export function TabuleiroPage() {
           </DragOverlay>
         </DndContext>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
+        <div className="game-nav">
           <button
             className="btn btn-ghost"
             type="button"
-            disabled={stepIndex === 0}
-            onClick={() => setStepIndex((i) => Math.max(0, i - 1))}
+            onClick={() =>
+              stepIndex === 0
+                ? navigate('/onboarding', { state: { startAtLast: true } })
+                : setStepIndex((i) => Math.max(0, i - 1))
+            }
           >
             Voltar
           </button>
