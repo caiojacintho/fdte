@@ -4,23 +4,28 @@ import { useNavigate } from 'react-router-dom';
 interface Slide {
   title: string;
   body: string;
+  bullets?: string[];
 }
 
 const SLIDES: Slide[] = [
   {
-    title: 'Bem-vindo(a) ao Nosso Bairro',
+    title: 'Seja bem-vindo(a)',
     body:
       'Esta é a Consulta Popular da Habitação do PLANEHAB. Sua opinião vai ajudar o Governo do Estado da Bahia a entender, na prática, como sua moradia e seu bairro são hoje e o que precisam para melhorar. Tudo o que você responder aqui é registrado e analisado pelos gestores responsáveis pelas políticas de habitação.',
   },
   {
     title: 'Um jogo, duas etapas',
     body:
-      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste cartas com imagens para os espaços indicados, igual a um tabuleiro de mesa. O jogo tem duas etapas: primeiro o tabuleiro da sua casa, depois o painel do seu bairro.',
+      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste cartas com imagens para os espaços indicados, igual a um tabuleiro de mesa. O jogo tem duas etapas: primeiro o tabuleiro da sua casa, depois o do seu bairro.',
   },
   {
     title: 'Etapa 1 — O tabuleiro da minha casa',
-    body:
-      'Aqui você responde em 3 passos: (1) Como é hoje — escolha a carta que melhor representa a situação atual da sua moradia; (2) Como mudar — escolha a carta que representa a mudança mais importante para você; (3) O que minha casa precisa — escolha até 12 cartas com os itens que sua casa mais precisa.',
+    body: 'Aqui você responde em 3 passos:',
+    bullets: [
+      'Como é hoje — escolha a carta que melhor representa a situação atual da sua moradia;',
+      'Como mudar — escolha a carta que representa a mudança mais importante para você;',
+      'O que minha casa precisa — escolha até 12 cartas com os itens que sua casa mais precisa.',
+    ],
   },
   {
     title: 'Etapa 2 — O painel Nosso Bairro',
@@ -76,27 +81,66 @@ export function OnboardingPage() {
         <h1 style={{ fontSize: '1.6rem', color: 'var(--color-primary-dark)', marginBottom: 16, textAlign: 'center' }}>
           {slide.title}
         </h1>
-        <p style={{ color: 'var(--color-ink-soft)', fontSize: '1.05rem', textAlign: 'center', minHeight: 140 }}>
-          {slide.body}
-        </p>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28, gap: 12 }}>
-          <button
-            className="btn btn-ghost"
-            type="button"
-            onClick={() => setIndex((i) => Math.max(0, i - 1))}
-            disabled={index === 0}
+        <div style={{ minHeight: 140 }}>
+          <p
+            style={{
+              color: 'var(--color-ink-soft)',
+              fontSize: '1.05rem',
+              textAlign: 'center',
+              marginBottom: slide.bullets ? 12 : 0,
+            }}
           >
-            Voltar
-          </button>
-          <button
-            className="btn"
-            type="button"
-            onClick={() => (isLast ? navigate('/jogo/tabuleiro') : setIndex((i) => i + 1))}
-          >
-            {isLast ? 'Começar o jogo' : 'Próximo'}
-          </button>
+            {slide.body}
+          </p>
+          {slide.bullets && (
+            <ul
+              style={{
+                color: 'var(--color-ink-soft)',
+                fontSize: '1.05rem',
+                textAlign: 'left',
+                margin: 0,
+                paddingLeft: 24,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+              }}
+            >
+              {slide.bullets.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          )}
         </div>
+
+        {index === 0 ? (
+          <div style={{ marginTop: 28 }}>
+            <button
+              className="btn"
+              type="button"
+              style={{ width: '100%' }}
+              onClick={() => setIndex((i) => i + 1)}
+            >
+              Iniciar
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28, gap: 12 }}>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setIndex((i) => Math.max(0, i - 1))}
+            >
+              Voltar
+            </button>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => (isLast ? navigate('/jogo/tabuleiro') : setIndex((i) => i + 1))}
+            >
+              {isLast ? 'Começar o jogo' : 'Próximo'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
