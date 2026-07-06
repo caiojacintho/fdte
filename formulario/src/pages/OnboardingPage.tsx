@@ -16,22 +16,22 @@ const SLIDES: Slide[] = [
   {
     title: 'Um jogo em 4 etapas',
     body:
-      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste cartas com imagens para os espaços indicados, igual a um tabuleiro de mesa. São 4 etapas no total — 3 sobre a sua casa e 1 sobre o seu bairro.',
+      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste ou clique nas cartas com imagens para levá-las aos espaços indicados, igual a um tabuleiro de mesa. São 4 etapas no total — 3 sobre a sua casa e 1 sobre o seu bairro.',
   },
   {
-    title: 'Sobre a sua casa — 3 etapas',
+    title: 'Sobre a sua casa',
     body:
       'As três primeiras etapas são sobre a sua moradia: (1) Como é hoje — escolha 1 carta que representa como é a sua casa atualmente; (2) O que mudar — escolha 1 carta com a mudança mais importante para você; (3) O que a casa precisa — escolha até 12 cartas com o que a sua casa mais precisa.',
   },
   {
-    title: 'Sobre o seu bairro — 1 etapa',
+    title: 'Sobre o seu bairro',
     body:
-      'Na última etapa, você mostra o que o seu bairro precisa: arraste cartas de equipamentos públicos, infraestrutura, mobilidade, segurança e riscos para o painel em formato de colmeia, indicando o que falta e o que é prioridade onde você mora.',
+      'Na última etapa, você mostra o que o seu bairro precisa: escolha as cartas que representam o que falta e o que é prioridade onde você mora.',
   },
   {
     title: 'Como jogar',
     body:
-      'No computador, clique e arraste as cartas até o espaço desejado. No celular ou tablet, basta tocar na carta para selecioná-la e colocá-la no espaço. Para remover uma carta de um espaço, basta clicar no "×". Você pode salvar e continuar depois — suas respostas ficam guardadas automaticamente.',
+      'No computador, clique e arraste as cartas até o espaço desejado. No celular, basta tocar na carta para selecioná-la e colocá-la no espaço. Para remover uma carta de um espaço, basta clicar no "×".',
   },
 ];
 

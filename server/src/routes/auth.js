@@ -68,3 +68,30 @@ authRouter.get('/me', authMiddleware, (req, res) => {
   if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
   res.json({ user: publicUser(user) });
 });
+
+// Atualiza os dados de cadastro (o e-mail não pode ser alterado).
+authRouter.patch('/me', authMiddleware, (req, res) => {
+  const { name, entity, city, cpf } = req.body || {};
+
+  if (!name || !entity || !city || !cpf) {
+    return res.status(400).json({ error: 'Preencha nome, entidade, cidade e CPF.' });
+  }
+  const cpfDigits = String(cpf).replace(/\D/g, '');
+  if (cpfDigits.length !== 11) {
+    return res.status(400).json({ error: 'CPF inválido. Informe os 11 dígitos.' });
+  }
+
+  const existing = db.prepare('SELECT id FROM users WHERE id = ?').get(req.user.sub);
+  if (!existing) return res.status(404).json({ error: 'Usuário não encontrado.' });
+
+  db.prepare('UPDATE users SET name = ?, entity = ?, city = ?, cpf = ? WHERE id = ?').run(
+    name.trim(),
+    entity.trim(),
+    city.trim(),
+    cpfDigits,
+    req.user.sub
+  );
+
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.sub);
+  res.json({ user: publicUser(user) });
+});

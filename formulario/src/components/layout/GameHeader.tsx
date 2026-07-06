@@ -1,13 +1,18 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import sedurLogo from '../../assets/logos/sedur.svg';
 import planehabLogo from '../../assets/logos/planehab.svg';
 
 export function GameHeader(_props: { stepLabel?: string }) {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const menuPillStyle = { padding: '13px 16px', fontSize: '1rem', cursor: 'default' } as const;
+  function goToEdit() {
+    setMenuOpen(false);
+    navigate('/editar-cadastro');
+  }
 
   const logos = (
     <>
@@ -25,6 +30,14 @@ export function GameHeader(_props: { stepLabel?: string }) {
       <div className="game-header-logos">{logos}</div>
 
       <div className="game-header-actions">
+        <button
+          className="btn btn-ghost game-header-editar"
+          type="button"
+          onClick={goToEdit}
+          style={{ padding: '8px 16px' }}
+        >
+          Editar informações
+        </button>
         <button
           className="btn btn-ghost game-header-sair"
           type="button"
@@ -52,13 +65,9 @@ export function GameHeader(_props: { stepLabel?: string }) {
         <>
           <div className="game-header-backdrop" onClick={() => setMenuOpen(false)} />
           <div className="game-header-menu" role="menu">
-            {user && (
-              <div className="game-header-menu-info">
-                <span className="btn btn-ghost" style={menuPillStyle}>{user.name}</span>
-                <span className="btn btn-ghost" style={menuPillStyle}>{user.entity}</span>
-                <span className="btn btn-ghost" style={menuPillStyle}>{user.city}</span>
-              </div>
-            )}
+            <button className="btn btn-ghost" type="button" onClick={goToEdit} style={{ width: '100%' }}>
+              Editar informações
+            </button>
             <button className="btn" type="button" onClick={logout} style={{ width: '100%' }}>
               Sair
             </button>

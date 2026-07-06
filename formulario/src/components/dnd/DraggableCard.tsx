@@ -30,7 +30,7 @@ export function DraggableCard({
       onClick={selectMode ? () => onSelect!(card.id) : undefined}
     >
       <img src={card.image} alt={card.label} draggable={false} />
-      <span className="card-label">{card.label}</span>
+      {!card.hideLabel && <span className="card-label">{card.label}</span>}
     </div>
   );
 }

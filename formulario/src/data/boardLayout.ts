@@ -15,9 +15,8 @@ export const PRECISA_SLOTS: SlotDef[] = Array.from({ length: 12 }, (_, i) => ({
   shape: 'rect',
 }));
 
-// Posições do favo hexagonal: 1 central + 12 ao redor, em 3 colunas (esquerda/centro/direita) x várias linhas,
-// reproduzindo o arranjo do painel "Nosso Bairro".
-export const PAINEL_SLOTS: SlotDef[] = Array.from({ length: 13 }, (_, i) => ({
+// Painel "Nosso Bairro": até 12 cartas escolhidas para o bairro.
+export const PAINEL_SLOTS: SlotDef[] = Array.from({ length: 12 }, (_, i) => ({
   key: `hex_${i + 1}`,
   shape: 'hex',
 }));

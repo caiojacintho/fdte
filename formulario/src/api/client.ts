@@ -47,6 +47,12 @@ export const api = {
 
   me: () => request<{ user: UserDTO }>('/api/auth/me'),
 
+  updateProfile: (payload: { name: string; entity: string; city: string; cpf: string }) =>
+    request<{ user: UserDTO }>('/api/auth/me', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+
   getCurrentSubmission: () => request<{ submission: SubmissionDTO }>('/api/submission/current'),
 
   savePlacement: (payload: { board: string; slotKey: string; cardId: string | null }) =>

@@ -677,6 +677,7 @@
   flex: 1;
   display: flex;
   justify-content: flex-end;
+  gap: 12px;
 }
 
 /* O hambúrguer só aparece no mobile (ativado na media query) */
@@ -729,6 +730,80 @@
   justify-content: space-between;
   gap: 12px;
   margin-top: 16px;
+}
+
+/* Resumo: no mobile o "Editar" do card de etapa vai para baixo, ocupando a largura toda */
+@media (max-width: 560px) {
+  .resumo-field-card {
+    flex-wrap: wrap;
+  }
+  .resumo-field-card .resumo-field-edit {
+    width: 100%;
+  }
+}
+
+/* Resumo: seções com grade de cartas. No desktop o "Editar" fica no canto
+   superior direito (sem sobrepor as cartas, que ocupam a linha de baixo);
+   no mobile ele vira um botão abaixo das cartas, ocupando a largura toda. */
+.resumo-section-card {
+  display: flex;
+  flex-direction: column;
+}
+.resumo-section-card > p {
+  margin: 0 0 12px;
+}
+.resumo-section-edit {
+  align-self: flex-end;
+  margin-top: 14px;
+  padding: 8px 16px;
+}
+.resumo-card-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.resumo-mini-card {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+.resumo-mini-empty {
+  border-radius: 8px;
+  border: 2px dashed var(--color-ink-faint);
+}
+@media (max-width: 560px) {
+  .resumo-section-card {
+    display: flex;
+    flex-direction: column;
+  }
+  .resumo-section-card > p {
+    margin: 0 0 12px;
+  }
+  .resumo-section-edit {
+    width: 100%;
+    margin-top: 14px;
+  }
+  /* No mobile a grade de cartas mostra sempre 2 colunas (etapas 3 e 4). */
+  .resumo-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .resumo-card-grid .resumo-mini-card {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+  /* Botões finais empilham: "Enviar respostas" em cima, "Voltar e editar" embaixo. */
+  .resumo-actions {
+    flex-direction: column-reverse;
+  }
+  .resumo-actions .btn {
+    width: 100%;
+  }
+  /* Editar cadastro: "Salvar alterações" em cima, "Voltar" embaixo. */
+  .editar-actions {
+    flex-direction: column-reverse;
+  }
 }
 
 /* Em telas muito estreitas os botões empilham: "Próximo passo" em cima, "Voltar" embaixo. */
@@ -795,8 +870,9 @@
     touch-action: auto;
   }
 
-  /* No mobile as pills e o Sair somem do header — vão para o menu hambúrguer */
+  /* No mobile as pills, o Sair e o Editar somem do header — vão para o menu hambúrguer */
   .game-header-info,
+  .game-header-editar,
   .game-header-sair {
     display: none !important;
   }

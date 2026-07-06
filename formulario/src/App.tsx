@@ -6,6 +6,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { TabuleiroPage } from './pages/TabuleiroPage';
 import { ResumoPage } from './pages/ResumoPage';
+import { ObrigadoPage } from './pages/ObrigadoPage';
+import { EditarCadastroPage } from './pages/EditarCadastroPage';
 
 export default function App() {
   return (
@@ -36,6 +38,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResumoPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/obrigado"
+            element={
+              <ProtectedRoute>
+                <ObrigadoPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editar-cadastro"
+            element={
+              <ProtectedRoute>
+                <EditarCadastroPage />
               </ProtectedRoute>
             }
           />
