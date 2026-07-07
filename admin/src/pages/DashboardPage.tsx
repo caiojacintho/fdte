@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, ChevronRight, MapPin, Send, Users, X } from 'lucide-react';
+import { Building2, ChevronRight, MapPin, Send, Users } from 'lucide-react';
 import { Header } from '../components/Header';
-import { ExportMenu } from '../components/ExportMenu';
 import { api, type SubmissionListItem } from '../api/client';
 
 function distinct(values: (string | null)[]): string[] {
@@ -16,7 +15,6 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [city, setCity] = useState('');
-  const [entity, setEntity] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -34,12 +32,8 @@ export function DashboardPage() {
   }, []);
 
   const cities = useMemo(() => distinct(rows.map((r) => r.city)), [rows]);
-  const entities = useMemo(() => distinct(rows.map((r) => r.entity)), [rows]);
 
-  const filtered = useMemo(
-    () => rows.filter((r) => (!city || r.city === city) && (!entity || r.entity === entity)),
-    [rows, city, entity]
-  );
+  const filtered = useMemo(() => rows.filter((r) => !city || r.city === city), [rows, city]);
 
   const stats = useMemo(
     () => ({
@@ -50,11 +44,28 @@ export function DashboardPage() {
     [filtered]
   );
 
-  const hasFilters = Boolean(city || entity);
+  const hasFilters = Boolean(city);
 
   return (
     <div>
-      <Header actions={<ExportMenu rows={rows} cities={cities} />} />
+      <Header
+        tools={
+          <select
+            className="input"
+            aria-label="Filtrar por cidade"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            style={{ minWidth: 200, borderRadius: 999, paddingLeft: 16 }}
+          >
+            <option value="">Todas as cidades</option>
+            {cities.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        }
+      />
 
       <main style={{ maxWidth: 1180, margin: '0 auto', padding: '28px 24px 80px' }}>
         {/* Cards de estatísticas */}
@@ -80,58 +91,6 @@ export function DashboardPage() {
             value={stats.entities}
             label="Entidades"
           />
-        </div>
-
-        {/* Filtros */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 12,
-            flexWrap: 'wrap',
-            alignItems: 'flex-end',
-            marginBottom: 16,
-          }}
-        >
-          <div className="field" style={{ minWidth: 200 }}>
-            <label htmlFor="filter-city">Cidade</label>
-            <select id="filter-city" className="input" value={city} onChange={(e) => setCity(e.target.value)}>
-              <option value="">Todas as cidades</option>
-              {cities.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field" style={{ minWidth: 200 }}>
-            <label htmlFor="filter-entity">Entidade</label>
-            <select
-              id="filter-entity"
-              className="input"
-              value={entity}
-              onChange={(e) => setEntity(e.target.value)}
-            >
-              <option value="">Todas as entidades</option>
-              {entities.map((e) => (
-                <option key={e} value={e}>
-                  {e}
-                </option>
-              ))}
-            </select>
-          </div>
-          {hasFilters && (
-            <button
-              className="btn btn-ghost"
-              type="button"
-              onClick={() => {
-                setCity('');
-                setEntity('');
-              }}
-            >
-              <X size={16} />
-              Limpar filtros
-            </button>
-          )}
         </div>
 
         {/* Tabela */}

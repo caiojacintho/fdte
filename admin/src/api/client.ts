@@ -1,3 +1,5 @@
+import { getToken } from '../auth/token';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export class ApiError extends Error {
@@ -9,7 +11,7 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('fdte_admin_token');
+  const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),

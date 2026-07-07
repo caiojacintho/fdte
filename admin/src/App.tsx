@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SubmissionDetailPage } from './pages/SubmissionDetailPage';
 import { AccountPage } from './pages/AccountPage';
+import { SuportePage } from './pages/SuportePage';
 
 export default function App() {
   return (
@@ -33,6 +34,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AccountPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/suporte"
+            element={
+              <ProtectedRoute>
+                <SuportePage />
               </ProtectedRoute>
             }
           />

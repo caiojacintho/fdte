@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { api, type UserDTO } from '../api/client';
+import { clearToken, getToken, setToken } from './token';
 
 interface AuthContextValue {
   user: UserDTO | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, remember?: boolean) => Promise<void>;
   logout: () => void;
 }
 
@@ -15,7 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('fdte_admin_token');
+    const token = getToken();
     if (!token) {
       setLoading(false);
       return;
@@ -24,27 +25,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .me()
       .then(({ user }) => {
         if (user.role !== 'admin') {
-          localStorage.removeItem('fdte_admin_token');
+          clearToken();
           setUser(null);
         } else {
           setUser(user);
         }
       })
-      .catch(() => localStorage.removeItem('fdte_admin_token'))
+      .catch(() => clearToken())
       .finally(() => setLoading(false));
   }, []);
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string, remember = true) {
     const { token, user } = await api.login({ email, password });
     if (user.role !== 'admin') {
       throw new Error('Esta conta não tem acesso ao painel administrativo.');
     }
-    localStorage.setItem('fdte_admin_token', token);
+    setToken(token, remember);
     setUser(user);
   }
 
   function logout() {
-    localStorage.removeItem('fdte_admin_token');
+    clearToken();
     setUser(null);
   }
 

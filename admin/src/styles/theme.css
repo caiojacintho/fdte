@@ -1,6 +1,6 @@
 :root {
   /* Painel do Gestor — tema light/clean, neutro e claro (distinto da UI do jogo) */
-  --bg: #f6f8fb;
+  --bg: #ffffff;
   --surface: #ffffff;
   --surface-muted: #f9fafb;
   --border: #e6e9ef;
@@ -10,9 +10,9 @@
   --text-soft: #55607a;
   --text-faint: #98a2b5;
 
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --primary-soft: #eaf1ff;
+  --primary: #bf6632;
+  --primary-dark: #a04f22;
+  --primary-soft: #f6e7db;
 
   --accent: #0d9488;
   --accent-soft: #e6f5f3;
@@ -24,8 +24,8 @@
   --danger: #dc2626;
   --danger-soft: #fdecec;
 
-  --font-heading: 'Inter', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-heading: 'DM Sans', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -150,6 +150,7 @@ a {
   width: 40px;
   height: 40px;
   flex-shrink: 0;
+  border-radius: 999px;
   text-decoration: none;
   color: var(--text-soft);
 }
@@ -279,6 +280,376 @@ select.input,
   font-size: 0.88rem;
 }
 
+/* ---------- Login ---------- */
+.login-shell {
+  min-height: 100%;
+  display: flex;
+  background: var(--surface);
+}
+
+.login-left {
+  flex: 1 1 46%;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 40px;
+  min-width: 0;
+}
+
+.login-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.login-title {
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+
+.login-sub {
+  margin-top: 8px;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.input-pass {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-pass .input {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.input-pass-toggle {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  padding: 6px;
+  display: inline-flex;
+}
+
+.input-pass-toggle:hover {
+  color: var(--text-soft);
+}
+
+.login-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.login-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.login-check input {
+  width: 15px;
+  height: 15px;
+  accent-color: #bf6632;
+  cursor: pointer;
+}
+
+.login-forgot {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #bf6632;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.login-forgot:hover {
+  text-decoration: underline;
+}
+
+.login-hint {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.login-footer {
+  flex-shrink: 0;
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+.login-right {
+  flex: 1 1 54%;
+  padding: 16px 16px 16px 0;
+  display: flex;
+}
+
+.login-right-panel {
+  flex: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Botão de entrar (laranja da marca, mais alto). */
+.login-submit {
+  background: #bf6632;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.login-submit:hover {
+  background: #934c22;
+}
+
+@media (max-width: 900px) {
+  .login-right {
+    display: none;
+  }
+  .login-left {
+    flex: 1 1 100%;
+  }
+}
+
+/* ---------- Modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 60;
+}
+
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 380px;
+  padding: 22px 24px 24px;
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  display: inline-flex;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.copy-field {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.copy-field .input {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-soft);
+}
+
+/* ---------- Date / Time pickers ---------- */
+.picker {
+  position: relative;
+}
+
+.picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+}
+
+.picker-trigger.placeholder span {
+  color: var(--text-faint);
+}
+
+.picker-trigger svg {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.picker-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 70;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 14px;
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cal-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.cal-nav {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--text-soft);
+}
+
+.cal-nav:hover {
+  background: var(--surface-muted);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 34px);
+  gap: 2px;
+}
+
+.cal-dow {
+  display: grid;
+  place-items: center;
+  height: 26px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.cal-day {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.cal-day:hover {
+  background: var(--surface-muted);
+}
+
+.cal-day.muted {
+  color: var(--text-faint);
+  opacity: 0.55;
+}
+
+.cal-day.today {
+  font-weight: 700;
+}
+
+.cal-day.selected,
+.cal-day.selected:hover {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.time-pop {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+}
+
+.time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time-col-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-faint);
+  margin-bottom: 6px;
+}
+
+.time-list {
+  max-height: 176px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: thin;
+}
+
+.time-opt {
+  width: 48px;
+  padding: 7px 0;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.time-opt:hover {
+  background: var(--surface-muted);
+}
+
+.time-opt.selected,
+.time-opt.selected:hover {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
 /* ---------- Badges ---------- */
 .badge {
   display: inline-flex;
@@ -374,4 +745,38 @@ select.input,
   height: 1px;
   background: var(--border);
   margin: 8px 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  text-align: left;
+}
+
+.menu-item:hover {
+  background: var(--surface-muted);
+}
+
+.menu-item svg {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.menu-item.danger {
+  color: var(--danger);
+}
+
+.menu-item.danger svg {
+  color: var(--danger);
 }

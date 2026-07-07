@@ -1,12 +1,9 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { User } from 'lucide-react';
-import { useAuth } from '../auth/AuthContext';
 import { BrandLogos } from './BrandLogos';
+import { TransmissionButton } from './TransmissionButton';
+import { UserMenu } from './UserMenu';
 
-export function Header({ actions }: { actions?: ReactNode }) {
-  const { user, logout } = useAuth();
-
+export function Header({ tools }: { tools?: ReactNode }) {
   return (
     <header
       style={{
@@ -24,22 +21,10 @@ export function Header({ actions }: { actions?: ReactNode }) {
       }}
     >
       <BrandLogos />
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {user && (
-          <Link
-            to="/conta"
-            className="btn btn-secondary icon-btn"
-            aria-label="Minha conta"
-            title="Minha conta"
-          >
-            <User size={18} />
-          </Link>
-        )}
-        {actions}
-        <button className="btn btn-secondary" type="button" onClick={logout}>
-          Sair
-        </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {tools}
+        <TransmissionButton />
+        <UserMenu />
       </div>
     </header>
   );
