@@ -8,19 +8,18 @@ adminRouter.get('/submissions', (req, res) => {
 
   let sql = `
     SELECT s.id, s.status, s.created_at, s.updated_at, s.completed_at,
-           u.name, u.email, u.entity, u.city, u.cpf
+           s.name, s.entity, s.city
     FROM submissions s
-    JOIN users u ON u.id = s.user_id
     WHERE 1=1
   `;
   const params = [];
 
   if (entity) {
-    sql += ' AND u.entity LIKE ?';
+    sql += ' AND s.entity LIKE ?';
     params.push(`%${entity}%`);
   }
   if (city) {
-    sql += ' AND u.city LIKE ?';
+    sql += ' AND s.city LIKE ?';
     params.push(`%${city}%`);
   }
   if (status) {
@@ -36,9 +35,9 @@ adminRouter.get('/submissions', (req, res) => {
 adminRouter.get('/submissions/:id', (req, res) => {
   const submission = db
     .prepare(
-      `SELECT s.*, u.name, u.email, u.entity, u.city, u.cpf
-       FROM submissions s JOIN users u ON u.id = s.user_id
-       WHERE s.id = ?`
+      `SELECT id, status, created_at, updated_at, completed_at, name, entity, city
+       FROM submissions
+       WHERE id = ?`
     )
     .get(req.params.id);
 
@@ -54,23 +53,21 @@ adminRouter.get('/submissions/:id', (req, res) => {
 adminRouter.get('/export.csv', (req, res) => {
   const rows = db
     .prepare(
-      `SELECT s.id as submission_id, u.name, u.email, u.entity, u.city,
+      `SELECT s.id as submission_id, s.name, s.entity, s.city,
               s.status, s.created_at, s.completed_at,
               p.board, p.slot_key, p.card_id
        FROM submissions s
-       JOIN users u ON u.id = s.user_id
        LEFT JOIN placements p ON p.submission_id = s.id
        ORDER BY s.id`
     )
     .all();
 
-  const header = 'submission_id,name,email,entity,city,status,created_at,completed_at,board,slot_key,card_id';
+  const header = 'submission_id,name,entity,city,status,created_at,completed_at,board,slot_key,card_id';
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = rows.map((r) =>
     [
       r.submission_id,
       r.name,
-      r.email,
       r.entity,
       r.city,
       r.status,
@@ -105,8 +102,8 @@ adminRouter.get('/stats', (req, res) => {
       `SELECT
          (SELECT COUNT(*) FROM submissions) as total_submissions,
          (SELECT COUNT(*) FROM submissions WHERE status = 'completed') as completed_submissions,
-         (SELECT COUNT(DISTINCT city) FROM users WHERE role = 'user') as total_cities,
-         (SELECT COUNT(DISTINCT entity) FROM users WHERE role = 'user') as total_entities
+         (SELECT COUNT(DISTINCT city) FROM submissions WHERE city != '') as total_cities,
+         (SELECT COUNT(DISTINCT entity) FROM submissions WHERE entity != '') as total_entities
       `
     )
     .get();

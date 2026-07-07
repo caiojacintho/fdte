@@ -22,8 +22,6 @@ function formatDate(value: string | null): string {
 
 const COLUMNS: Column[] = [
   { header: 'Nome', value: (s) => s.name },
-  { header: 'E-mail', value: (s) => s.email },
-  { header: 'CPF', value: (s) => s.cpf ?? '' },
   { header: 'Entidade', value: (s) => s.entity },
   { header: 'Cidade', value: (s) => s.city },
   { header: 'Status', value: (s) => STATUS_LABEL[s.status] ?? s.status },

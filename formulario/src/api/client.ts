@@ -1,5 +1,8 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
+// Token da submissão anônima atual (gerado ao preencher a tela de identificação).
+export const SUBMISSION_TOKEN_KEY = 'fdte_submission_token';
+
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -9,12 +12,12 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('fdte_token');
+  const token = localStorage.getItem(SUBMISSION_TOKEN_KEY);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) headers['X-Submission-Token'] = token;
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
@@ -26,30 +29,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  register: (payload: {
-    name: string;
-    email: string;
-    password: string;
-    entity: string;
-    city: string;
-    cpf: string;
-  }) =>
-    request<{ token: string; user: UserDTO }>('/api/auth/register', {
+  startSubmission: (payload: { name: string; city: string; entity: string }) =>
+    request<{ token: string; submission: SubmissionDTO }>('/api/submission/start', {
       method: 'POST',
-      body: JSON.stringify(payload),
-    }),
-
-  login: (payload: { email: string; password: string }) =>
-    request<{ token: string; user: UserDTO }>('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    }),
-
-  me: () => request<{ user: UserDTO }>('/api/auth/me'),
-
-  updateProfile: (payload: { name: string; entity: string; city: string; cpf: string }) =>
-    request<{ user: UserDTO }>('/api/auth/me', {
-      method: 'PATCH',
       body: JSON.stringify(payload),
     }),
 
@@ -65,16 +47,6 @@ export const api = {
     request<{ submission: SubmissionDTO }>('/api/submission/complete', { method: 'POST' }),
 };
 
-export interface UserDTO {
-  id: number;
-  name: string;
-  email: string;
-  entity: string;
-  city: string;
-  cpf: string;
-  role: 'user' | 'admin';
-}
-
 export interface PlacementDTO {
   board: string;
   slot_key: string;
@@ -83,6 +55,9 @@ export interface PlacementDTO {
 
 export interface SubmissionDTO {
   id: number;
+  name: string;
+  city: string;
+  entity: string;
   status: 'in_progress' | 'completed';
   created_at: string;
   updated_at: string;

@@ -15,7 +15,9 @@ app.use(express.json());
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 app.use('/api/auth', authRouter);
-app.use('/api/submission', authMiddleware, submissionRouter);
+// O formulário é público: os participantes não têm conta. Cada submissão é
+// identificada por um token próprio (header X-Submission-Token).
+app.use('/api/submission', submissionRouter);
 app.use('/api/admin', authMiddleware, requireAdmin, adminRouter);
 
 app.use((err, req, res, next) => {

@@ -6,21 +6,12 @@ import { CardTray } from '../components/dnd/CardTray';
 import { Slot } from '../components/dnd/Slot';
 import { useBoardSensors } from '../components/dnd/sensors';
 import { useSubmission } from '../submission/SubmissionContext';
-import {
-  CARDS,
-  PAINEL_CARDS,
-  getCard,
-  getPainelCard,
-  type CardCategory,
-  type CardDef,
-} from '../data/cards';
+import { CARDS, getCard, type CardCategory, type CardDef } from '../data/cards';
 import {
   TABULEIRO_BOARD,
-  PAINEL_BOARD,
   COMO_E_HOJE_SLOT,
   COMO_MUDAR_SLOT,
   PRECISA_SLOTS,
-  PAINEL_SLOTS,
 } from '../data/boardLayout';
 
 const LIST_ZONE = 'list-zone';
@@ -68,13 +59,6 @@ const STEPS: StepDef[] = [
     board: TABULEIRO_BOARD,
     kind: 'list',
     slots: PRECISA_SLOTS,
-  },
-  {
-    key: 'painel',
-    instructions: 'Escolha as cartas mostrando o que o seu bairro precisa',
-    board: PAINEL_BOARD,
-    kind: 'list',
-    slots: PAINEL_SLOTS,
   },
 ];
 
@@ -173,9 +157,8 @@ export function TabuleiroPage() {
   const [showRequired, setShowRequired] = useState(false);
 
   const step = STEPS[stepIndex];
-  const isPainel = step.key === 'painel';
-  const cardPool = isPainel ? PAINEL_CARDS : CARDS;
-  const lookupCard = isPainel ? getPainelCard : getCard;
+  const cardPool = CARDS;
+  const lookupCard = getCard;
 
   const usedCardIds = useMemo(
     () =>
@@ -187,7 +170,6 @@ export function TabuleiroPage() {
 
   const availableCards = cardPool.filter((c) => {
     if (usedCardIds.has(c.id)) return false;
-    if (isPainel) return true;
     const cat = STEP_CATEGORY[step.key];
     if (cat) return c.category === cat;
     return c.category !== 'tipologia' && c.category !== 'mudanca';
@@ -264,15 +246,16 @@ export function TabuleiroPage() {
     step.kind !== 'list' ? lookupCard(getPlacedCardId(step.board, step.slot!)) ?? undefined : undefined;
 
   return (
-    <div className={`tabuleiro-page step-${step.key}${isPainel ? ' painel-page' : ''}`}>
+    <div className={`tabuleiro-page step-${step.key}`}>
       <GameHeader stepLabel={`Passo ${stepIndex + 1} de ${STEPS.length}`} />
 
       <div className="tabuleiro-content" style={{ padding: '20px 24px 16px' }}>
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="board-columns">
             <div className="board-left-col">
-              <div className="board-card">
-                <h3 style={{ margin: 0, color: 'var(--color-ink-soft)' }}>{step.instructions}</h3>
+              <div className="board-card board-card-question">
+                <span className="step-badge">Etapa {stepIndex + 1}</span>
+                <h3 style={{ margin: 0, color: 'var(--color-paper)' }}>{step.instructions}</h3>
               </div>
               <div className="tabuleiro-board board-drop">
                 <div className="board-drop-inner">

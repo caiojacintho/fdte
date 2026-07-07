@@ -69,6 +69,26 @@
   box-shadow: var(--shadow-card);
 }
 
+/* Card da pergunta: cores invertidas (fundo na cor do traço, texto no bege claro). */
+.board-card-question {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.step-badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  margin-bottom: 10px;
+}
+
 .tabuleiro-page {
   height: 100vh;
   display: flex;
@@ -144,7 +164,7 @@
   flex: 1;
   flex-wrap: wrap;
   align-content: flex-start;
-  padding: 32px 6px 32px 0;
+  padding: 34px 6px 34px 0;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -276,7 +296,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 56px 16px 32px 14px;
+  padding: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--color-ink-soft) transparent;
 }
@@ -311,14 +331,11 @@
 }
 
 .precisa-counter {
-  position: absolute;
-  top: 12px;
-  left: 14px;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.35rem;
   color: var(--color-ink-soft);
-  z-index: 2;
+  margin-left: 32px;
 }
 
 .precisa-item {
@@ -327,17 +344,19 @@
   align-items: center;
   gap: 10px;
   flex: 0 0 auto;
+  margin-left: 32px;
   background: var(--color-surface);
   border: 2px solid var(--color-ink-soft);
   border-radius: var(--radius-sm);
   padding: 6px 8px;
 }
 
+/* Número da ordem: fora do card, à esquerda e centralizado verticalmente. */
 .precisa-item-order {
   position: absolute;
-  top: 0;
-  left: 0;
-  transform: translate(-50%, -50%);
+  top: 50%;
+  right: calc(100% + 8px);
+  transform: translateY(-50%);
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -362,7 +381,7 @@
 .precisa-arrow {
   border: none;
   background: none;
-  padding: 0 2px;
+  padding: 2px 4px;
   cursor: pointer;
   color: var(--color-ink-soft);
   display: flex;
@@ -371,8 +390,8 @@
 }
 
 .precisa-arrow-icon {
-  width: 13px;
-  height: 11px;
+  width: 20px;
+  height: 17px;
   display: block;
 }
 
@@ -649,6 +668,29 @@
   z-index: 2;
 }
 
+/* ============ Header de marca (gov à esquerda, FDTE à direita) ============ */
+.brand-header {
+  width: 100%;
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand-header-gov {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+/* O logo do FDTE aparece só no desktop. */
+@media (max-width: 560px) {
+  .brand-header-fdte {
+    display: none;
+  }
+}
+
 /* ============ Header do jogo (logos à esquerda, info ao centro, ações à direita) ============ */
 .game-header {
   position: relative;
@@ -663,6 +705,19 @@
   align-items: center;
   gap: 24px;
   min-width: 0;
+}
+
+/* Logo do FDTE no header do jogo — à direita, visível também no mobile. */
+.game-header-fdte {
+  height: 30px;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 560px) {
+  .game-header-fdte {
+    height: 24px;
+  }
 }
 
 .game-header-info {
@@ -840,13 +895,24 @@
     min-height: 0;
   }
 
-  /* Sem scroll interno no mobile — a página inteira rola; cartas centralizadas */
+  /* Sem scroll interno no mobile — a página inteira rola; cartas centralizadas.
+     Padding vertical igual ao lateral (14px do .board-cards). */
   .board-cards .tray {
     overflow: visible;
     -webkit-mask-image: none;
     mask-image: none;
     justify-content: center;
-    padding: 24px 0;
+    padding: 14px 0;
+  }
+
+  /* No mobile as cartas ocupam a largura máxima do card que as engloba. */
+  .board-cards {
+    padding: 0 14px;
+  }
+
+  .board-cards .draggable-card {
+    width: 100%;
+    max-width: 440px;
   }
 
   .precisa-zone {
@@ -888,10 +954,12 @@
     white-space: normal;
   }
 
-  /* Respiro acima e abaixo do card dentro da área de drop */
+  /* Respiro acima e abaixo do card dentro da área de drop; menos padding à
+     esquerda (o gutter dos números já ocupa esse espaço). */
   .tabuleiro-board.board-drop {
     padding-top: 12px;
     padding-bottom: 12px;
+    padding-left: 8px;
   }
 }
 

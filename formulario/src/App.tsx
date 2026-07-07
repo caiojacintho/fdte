@@ -1,65 +1,54 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from './auth/AuthContext';
-import { ProtectedRoute } from './components/layout/ProtectedRoute';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
+import { SubmissionProvider } from './submission/SubmissionContext';
+import { RequireSubmission } from './components/layout/RequireSubmission';
+import { IdentificacaoPage } from './pages/IdentificacaoPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { TabuleiroPage } from './pages/TabuleiroPage';
 import { ResumoPage } from './pages/ResumoPage';
 import { ObrigadoPage } from './pages/ObrigadoPage';
-import { EditarCadastroPage } from './pages/EditarCadastroPage';
 
 export default function App() {
   return (
-    <AuthProvider>
+    <SubmissionProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/cadastro" element={<RegisterPage />} />
+          <Route path="/" element={<IdentificacaoPage />} />
           <Route
             path="/onboarding"
             element={
-              <ProtectedRoute>
+              <RequireSubmission>
                 <OnboardingPage />
-              </ProtectedRoute>
+              </RequireSubmission>
             }
           />
           <Route
             path="/jogo/tabuleiro"
             element={
-              <ProtectedRoute>
+              <RequireSubmission>
                 <TabuleiroPage />
-              </ProtectedRoute>
+              </RequireSubmission>
             }
           />
           <Route path="/jogo/painel" element={<Navigate to="/jogo/tabuleiro" replace />} />
           <Route
             path="/resumo"
             element={
-              <ProtectedRoute>
+              <RequireSubmission>
                 <ResumoPage />
-              </ProtectedRoute>
+              </RequireSubmission>
             }
           />
           <Route
             path="/obrigado"
             element={
-              <ProtectedRoute>
+              <RequireSubmission>
                 <ObrigadoPage />
-              </ProtectedRoute>
+              </RequireSubmission>
             }
           />
-          <Route
-            path="/editar-cadastro"
-            element={
-              <ProtectedRoute>
-                <EditarCadastroPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </SubmissionProvider>
   );
 }

@@ -1,17 +1,11 @@
 import sedurLogo from '../../assets/logos/sedur.svg';
 import planehabLogo from '../../assets/logos/planehab.svg';
+import fdteLogo from '../../assets/logos/fdte.png';
 
 export function BrandHeader() {
   return (
-    <header style={{ width: '100%', padding: '18px 28px' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 16,
-        }}
-      >
+    <header className="brand-header">
+      <div className="brand-header-gov">
         <img
           src={sedurLogo}
           alt="SEDUR — Secretaria de Desenvolvimento Urbano"
@@ -19,6 +13,7 @@ export function BrandHeader() {
         />
         <img src={planehabLogo} alt="PLANEHAB" style={{ height: 52, width: 'auto' }} />
       </div>
+      <img className="brand-header-fdte" src={fdteLogo} alt="FDTE" style={{ height: 34, width: 'auto' }} />
     </header>
   );
 }

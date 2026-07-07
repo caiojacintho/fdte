@@ -166,7 +166,6 @@ export function DashboardPage() {
                   <tr key={s.id}>
                     <td>
                       <div style={{ fontWeight: 600 }}>{s.name}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-faint)' }}>{s.email}</div>
                     </td>
                     <td>{s.entity}</td>
                     <td>{s.city}</td>

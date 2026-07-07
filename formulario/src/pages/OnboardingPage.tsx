@@ -11,22 +11,17 @@ const SLIDES: Slide[] = [
   {
     title: 'Seja bem-vindo(a)',
     body:
-      'Esta é a Consulta Popular da Habitação do PLANEHAB. Sua opinião vai ajudar o Governo do Estado da Bahia a entender, na prática, como sua moradia e seu bairro são hoje e o que precisam para melhorar. Tudo o que você responder aqui é registrado e analisado pelos gestores responsáveis pelas políticas de habitação.',
+      'Esta é a Consulta Popular da Habitação do PLANEHAB. Sua opinião vai ajudar o Governo do Estado da Bahia a entender, na prática, como sua moradia é hoje e o que ela precisa para melhorar. Tudo o que você responder aqui é registrado e analisado pelos gestores responsáveis pelas políticas de habitação.',
   },
   {
-    title: 'Um jogo em 4 etapas',
+    title: 'Um jogo em 3 etapas',
     body:
-      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste ou clique nas cartas com imagens para levá-las aos espaços indicados, igual a um tabuleiro de mesa. São 4 etapas no total — 3 sobre a sua casa e 1 sobre o seu bairro.',
+      'Em vez de um formulário tradicional, você vai jogar um jogo de tabuleiro digital: arraste ou clique nas cartas com imagens para levá-las aos espaços indicados, igual a um tabuleiro de mesa. São 3 etapas no total, todas sobre a sua casa.',
   },
   {
     title: 'Sobre a sua casa',
     body:
-      'As três primeiras etapas são sobre a sua moradia: (1) Como é hoje — escolha 1 carta que representa como é a sua casa atualmente; (2) O que mudar — escolha 1 carta com a mudança mais importante para você; (3) O que a casa precisa — escolha até 12 cartas com o que a sua casa mais precisa.',
-  },
-  {
-    title: 'Sobre o seu bairro',
-    body:
-      'Na última etapa, você mostra o que o seu bairro precisa: escolha as cartas que representam o que falta e o que é prioridade onde você mora.',
+      'As três etapas são sobre a sua moradia: (1) Como é hoje — escolha 1 carta que representa como é a sua casa atualmente; (2) O que mudar — escolha 1 carta com a mudança mais importante para você; (3) O que a casa precisa — escolha até 12 cartas com o que a sua casa mais precisa.',
   },
   {
     title: 'Como jogar',

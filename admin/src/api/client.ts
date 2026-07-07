@@ -47,8 +47,6 @@ export interface SubmissionListItem {
   updated_at: string;
   completed_at: string | null;
   name: string;
-  email: string;
-  cpf: string | null;
   entity: string;
   city: string;
 }

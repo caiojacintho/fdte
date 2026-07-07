@@ -1,9 +1,9 @@
 // Popula o banco com dados FALSOS/ALEATÓRIOS para demonstração do painel.
 // Uso: (na pasta server) `node scripts/seed-fake-data.js`
-// ATENÇÃO: apaga todas as submissões, placements e usuários não-admin antes de inserir.
+// ATENÇÃO: apaga todas as submissões e placements antes de inserir.
 
+import { randomUUID } from 'node:crypto';
 import { db } from '../src/db.js';
-import { hashPassword } from '../src/auth.js';
 
 // ---------- Pools de dados fictícios ----------
 const FIRST_NAMES = [
@@ -61,14 +61,6 @@ function pickMany(arr, min, max) {
   return out;
 }
 
-function fakeCpf() {
-  return Array.from({ length: 11 }, () => rand(10)).join('');
-}
-
-function slug(str) {
-  return str.normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[^a-zA-Z]+/g, '.').toLowerCase();
-}
-
 // Data no passado (até `daysAgo` dias) no formato do SQLite: "YYYY-MM-DD HH:MM:SS".
 function pastDateTime(maxDaysAgo) {
   const ms = Date.now() - rand(maxDaysAgo * 24 * 60 * 60 * 1000);
@@ -76,53 +68,35 @@ function pastDateTime(maxDaysAgo) {
 }
 
 // ---------- Limpeza ----------
-console.log('[seed-fake] limpando placements, submissions e usuários não-admin…');
+console.log('[seed-fake] limpando placements e submissions…');
 db.exec('DELETE FROM placements;');
 db.exec('DELETE FROM submissions;');
-db.prepare("DELETE FROM users WHERE role != 'admin'").run();
 
 // ---------- Inserção ----------
 const TOTAL = 24;
-const insertUser = db.prepare(
-  `INSERT INTO users (name, email, password_hash, entity, city, cpf, role, created_at)
-   VALUES (?, ?, ?, ?, ?, ?, 'user', ?)`
-);
 const insertSubmission = db.prepare(
-  `INSERT INTO submissions (user_id, status, created_at, updated_at, completed_at)
-   VALUES (?, ?, ?, ?, ?)`
+  `INSERT INTO submissions (token, name, city, entity, status, created_at, updated_at, completed_at)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 );
 const insertPlacement = db.prepare(
   `INSERT INTO placements (submission_id, board, slot_key, card_id, created_at)
    VALUES (?, ?, ?, ?, ?)`
 );
 
-const defaultHash = hashPassword('senha123');
-const usedEmails = new Set();
 let completed = 0;
 
 for (let i = 0; i < TOTAL; i++) {
   const name = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)} ${pick(LAST_NAMES)}`;
-  let email = `${slug(name)}@exemplo.com`;
-  while (usedEmails.has(email)) email = `${slug(name)}${rand(999)}@exemplo.com`;
-  usedEmails.add(email);
-
   const createdAt = pastDateTime(30);
-  const userInfo = insertUser.run(
-    name,
-    email,
-    defaultHash,
-    pick(ENTITIES),
-    pick(CITIES),
-    fakeCpf(),
-    createdAt
-  );
-  const userId = userInfo.lastInsertRowid;
 
   const isCompleted = chance(0.75);
   if (isCompleted) completed++;
   const completedAt = isCompleted ? pastDateTime(20) : null;
   const subInfo = insertSubmission.run(
-    userId,
+    randomUUID(),
+    name,
+    pick(CITIES),
+    pick(ENTITIES),
     isCompleted ? 'completed' : 'in_progress',
     createdAt,
     completedAt || createdAt,

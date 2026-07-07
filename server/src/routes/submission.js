@@ -1,19 +1,8 @@
 import { Router } from 'express';
+import { randomUUID } from 'node:crypto';
 import { db } from '../db.js';
 
 export const submissionRouter = Router();
-
-function getOrCreateCurrentSubmission(userId) {
-  let submission = db
-    .prepare(`SELECT * FROM submissions WHERE user_id = ? AND status = 'in_progress' ORDER BY id DESC LIMIT 1`)
-    .get(userId);
-
-  if (!submission) {
-    const info = db.prepare(`INSERT INTO submissions (user_id) VALUES (?)`).run(userId);
-    submission = db.prepare('SELECT * FROM submissions WHERE id = ?').get(info.lastInsertRowid);
-  }
-  return submission;
-}
 
 function withPlacements(submission) {
   const placements = db
@@ -22,18 +11,51 @@ function withPlacements(submission) {
   return { ...submission, placements };
 }
 
+// Resolve a submissão atual a partir do token enviado no header.
+// Responde 401 (e retorna null) quando o token está ausente ou é inválido,
+// para o front limpar a sessão e voltar à tela de identificação.
+function requireSubmission(req, res) {
+  const token = req.get('X-Submission-Token');
+  const submission = token
+    ? db.prepare('SELECT * FROM submissions WHERE token = ?').get(token)
+    : null;
+  if (!submission) {
+    res.status(401).json({ error: 'Sessão não encontrada. Recomece o preenchimento.' });
+    return null;
+  }
+  return submission;
+}
+
+// Cria uma nova submissão anônima (tela inicial de identificação).
+submissionRouter.post('/start', (req, res) => {
+  const { name, city, entity } = req.body || {};
+  if (!name?.trim() || !city?.trim() || !entity?.trim()) {
+    return res.status(400).json({ error: 'Preencha nome, cidade e entidade.' });
+  }
+
+  const token = randomUUID();
+  const info = db
+    .prepare('INSERT INTO submissions (token, name, city, entity) VALUES (?, ?, ?, ?)')
+    .run(token, name.trim(), city.trim(), entity.trim());
+
+  const submission = db.prepare('SELECT * FROM submissions WHERE id = ?').get(info.lastInsertRowid);
+  res.status(201).json({ token, submission: withPlacements(submission) });
+});
+
 submissionRouter.get('/current', (req, res) => {
-  const submission = getOrCreateCurrentSubmission(req.user.sub);
+  const submission = requireSubmission(req, res);
+  if (!submission) return;
   res.json({ submission: withPlacements(submission) });
 });
 
 submissionRouter.put('/placements', (req, res) => {
+  const submission = requireSubmission(req, res);
+  if (!submission) return;
+
   const { board, slotKey, cardId } = req.body || {};
   if (!board || !slotKey) {
     return res.status(400).json({ error: 'board e slotKey são obrigatórios.' });
   }
-
-  const submission = getOrCreateCurrentSubmission(req.user.sub);
   if (submission.status !== 'in_progress') {
     return res.status(409).json({ error: 'Este formulário já foi enviado e não pode ser alterado.' });
   }
@@ -59,7 +81,9 @@ submissionRouter.put('/placements', (req, res) => {
 });
 
 submissionRouter.post('/complete', (req, res) => {
-  const submission = getOrCreateCurrentSubmission(req.user.sub);
+  const submission = requireSubmission(req, res);
+  if (!submission) return;
+
   db.prepare(
     `UPDATE submissions SET status = 'completed', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`
   ).run(submission.id);

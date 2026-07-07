@@ -83,10 +83,6 @@ export function SubmissionDetailPage() {
                   <p style={{ color: 'var(--text-soft)', marginTop: 6, fontSize: '0.9rem' }}>
                     {submission.entity} · {submission.city}
                   </p>
-                  <p style={{ color: 'var(--text-faint)', marginTop: 2, fontSize: '0.85rem' }}>
-                    {submission.email}
-                    {submission.cpf ? ` · CPF ${submission.cpf}` : ''}
-                  </p>
                 </div>
                 <span
                   className={`badge ${submission.status === 'completed' ? 'badge-success' : 'badge-warning'}`}

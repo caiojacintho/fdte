@@ -1,9 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { api, type SubmissionDTO } from '../api/client';
+import { api, ApiError, SUBMISSION_TOKEN_KEY, type SubmissionDTO } from '../api/client';
 
 interface SubmissionContextValue {
   submission: SubmissionDTO | null;
   loading: boolean;
+  start: (identity: { name: string; city: string; entity: string }) => Promise<void>;
   getCard: (board: string, slotKey: string) => string | null;
   setCard: (board: string, slotKey: string, cardId: string | null) => Promise<void>;
   complete: () => Promise<void>;
@@ -17,10 +18,22 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    const token = localStorage.getItem(SUBMISSION_TOKEN_KEY);
+    if (!token) {
+      setSubmission(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const { submission } = await api.getCurrentSubmission();
       setSubmission(submission);
+    } catch (err) {
+      // Token inválido/expirado: limpa a sessão para voltar à identificação.
+      if (err instanceof ApiError && err.status === 401) {
+        localStorage.removeItem(SUBMISSION_TOKEN_KEY);
+        setSubmission(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -29,6 +42,12 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  const start = useCallback(async (identity: { name: string; city: string; entity: string }) => {
+    const { token, submission } = await api.startSubmission(identity);
+    localStorage.setItem(SUBMISSION_TOKEN_KEY, token);
+    setSubmission(submission);
+  }, []);
 
   const getCard = useCallback(
     (board: string, slotKey: string) => {
@@ -49,7 +68,9 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <SubmissionContext.Provider value={{ submission, loading, getCard, setCard, complete, refresh }}>
+    <SubmissionContext.Provider
+      value={{ submission, loading, start, getCard, setCard, complete, refresh }}
+    >
       {children}
     </SubmissionContext.Provider>
   );

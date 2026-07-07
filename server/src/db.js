@@ -10,6 +10,35 @@ fs.mkdirSync(dataDir, { recursive: true });
 
 export const db = new DatabaseSync(path.join(dataDir, 'app.db'));
 
+// A tabela `users` guarda apenas as contas do painel admin (gestores).
+// Os participantes do formulário NÃO têm conta: cada submissão é anônima e
+// carrega a própria identidade (nome/cidade/entidade), identificada por um token.
+const SUBMISSIONS_DDL = `
+  CREATE TABLE IF NOT EXISTS submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token TEXT UNIQUE,
+    name TEXT NOT NULL DEFAULT '',
+    city TEXT NOT NULL DEFAULT '',
+    entity TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'in_progress',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    completed_at TEXT
+  );
+`;
+
+const PLACEMENTS_DDL = `
+  CREATE TABLE IF NOT EXISTS placements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    submission_id INTEGER NOT NULL REFERENCES submissions(id),
+    board TEXT NOT NULL,
+    slot_key TEXT NOT NULL,
+    card_id TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(submission_id, board, slot_key)
+  );
+`;
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,30 +51,21 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS submissions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    status TEXT NOT NULL DEFAULT 'in_progress',
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-    completed_at TEXT
-  );
-
-  CREATE TABLE IF NOT EXISTS placements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    submission_id INTEGER NOT NULL REFERENCES submissions(id),
-    board TEXT NOT NULL,
-    slot_key TEXT NOT NULL,
-    card_id TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(submission_id, board, slot_key)
-  );
+  ${SUBMISSIONS_DDL}
+  ${PLACEMENTS_DDL}
 `);
 
-// Migração: adiciona a coluna cpf em bancos já existentes (CREATE TABLE IF NOT EXISTS não altera colunas).
-const userColumns = db.prepare('PRAGMA table_info(users)').all();
-if (!userColumns.some((c) => c.name === 'cpf')) {
-  db.exec("ALTER TABLE users ADD COLUMN cpf TEXT NOT NULL DEFAULT ''");
+// Migração: bancos antigos amarravam a submissão a `users(id)` via user_id.
+// O novo modelo é anônimo por token. Se a tabela ainda estiver no formato
+// antigo (sem a coluna `token`), recriamos submissions/placements no novo
+// formato. Os dados antigos (de teste) são descartados — repopule com o seed.
+const subColumns = db.prepare('PRAGMA table_info(submissions)').all();
+if (subColumns.length > 0 && !subColumns.some((c) => c.name === 'token')) {
+  db.exec('DROP TABLE IF EXISTS placements;');
+  db.exec('DROP TABLE IF EXISTS submissions;');
+  db.exec(SUBMISSIONS_DDL);
+  db.exec(PLACEMENTS_DDL);
+  console.warn('[migração] submissions recriada no novo formato (token). Dados antigos removidos.');
 }
 
 function seedAdmin() {
