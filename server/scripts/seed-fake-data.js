@@ -30,9 +30,7 @@ const ENTITIES = [
   'Associação de Bairro Vila Esperança',
 ];
 
-const TIPOLOGIA = [
-  'tipologia-ocupacao', 'tipologia-encosta', 'tipologia-apartamento', 'tipologia-rural', 'tipologia-casa-propria',
-];
+const TIPOLOGIA = Array.from({ length: 15 }, (_, i) => `tipologia-${String(i + 1).padStart(2, '0')}`);
 const MUDANCA = ['mudanca-casa-nova', 'mudanca-reforma'];
 const CASA = [
   'casa-adaptacao', 'casa-agua', 'casa-aluguel', 'casa-banheiro-1', 'casa-banheiro-2', 'casa-cozinha',

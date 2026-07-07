@@ -19,11 +19,21 @@ import casaQuarto3 from '../assets/img/cards/itens-casa/quarto3.png';
 import casaQuintal from '../assets/img/cards/itens-casa/quintalouhorta.png';
 import casaReboco from '../assets/img/cards/itens-casa/rebocooupintura.png';
 import casaTelhado from '../assets/img/cards/itens-casa/telhado.png';
-import tipologiaOcupacao from '../assets/img/cards/pergunta1/1.png';
-import tipologiaEncosta from '../assets/img/cards/pergunta1/2.png';
-import tipologiaApartamento from '../assets/img/cards/pergunta1/3.png';
-import tipologiaRural from '../assets/img/cards/pergunta1/4.png';
-import tipologiaCasaPropria from '../assets/img/cards/pergunta1/5.png';
+import tipologia01 from '../assets/img/cards/pergunta1/tipologia-01.png';
+import tipologia02 from '../assets/img/cards/pergunta1/tipologia-02.png';
+import tipologia03 from '../assets/img/cards/pergunta1/tipologia-03.png';
+import tipologia04 from '../assets/img/cards/pergunta1/tipologia-04.png';
+import tipologia05 from '../assets/img/cards/pergunta1/tipologia-05.png';
+import tipologia06 from '../assets/img/cards/pergunta1/tipologia-06.png';
+import tipologia07 from '../assets/img/cards/pergunta1/tipologia-07.png';
+import tipologia08 from '../assets/img/cards/pergunta1/tipologia-08.png';
+import tipologia09 from '../assets/img/cards/pergunta1/tipologia-09.png';
+import tipologia10 from '../assets/img/cards/pergunta1/tipologia-10.png';
+import tipologia11 from '../assets/img/cards/pergunta1/tipologia-11.png';
+import tipologia12 from '../assets/img/cards/pergunta1/tipologia-12.png';
+import tipologia13 from '../assets/img/cards/pergunta1/tipologia-13.png';
+import tipologia14 from '../assets/img/cards/pergunta1/tipologia-14.png';
+import tipologia15 from '../assets/img/cards/pergunta1/tipologia-15.png';
 import mudancaCasaNova from '../assets/img/cards/pergunta2/A.png';
 import mudancaReforma from '../assets/img/cards/pergunta2/B.png';
 import p4Equip1 from '../assets/img/cards/pergunta4/01-ITEM-EQUIPAMENTOS (1).png';
@@ -99,11 +109,21 @@ export const CARDS: CardDef[] = [
   { id: 'casa-quintal', label: 'Quintal ou horta', category: 'casa', image: casaQuintal, hideLabel: true },
   { id: 'casa-reboco', label: 'Reboco ou pintura', category: 'casa', image: casaReboco, hideLabel: true },
   { id: 'casa-telhado', label: 'Telhado', category: 'casa', image: casaTelhado, hideLabel: true },
-  { id: 'tipologia-ocupacao', label: 'Ocupação / Acampamento', category: 'tipologia', image: tipologiaOcupacao },
-  { id: 'tipologia-encosta', label: 'Autoconstrução em encosta', category: 'tipologia', image: tipologiaEncosta },
-  { id: 'tipologia-apartamento', label: 'Apartamento (conjunto habitacional)', category: 'tipologia', image: tipologiaApartamento },
-  { id: 'tipologia-rural', label: 'Casa rural / sítio', category: 'tipologia', image: tipologiaRural },
-  { id: 'tipologia-casa-propria', label: 'Casa própria consolidada', category: 'tipologia', image: tipologiaCasaPropria },
+  { id: 'tipologia-01', label: 'Habitação Multifamiliar de Conjuntos Habitacionais', category: 'tipologia', image: tipologia01 },
+  { id: 'tipologia-02', label: 'Comunidades de Fundo e Fecho de Pasto (PCTs)', category: 'tipologia', image: tipologia02 },
+  { id: 'tipologia-03', label: 'Comunidades Quilombolas (PCTs)', category: 'tipologia', image: tipologia03 },
+  { id: 'tipologia-04', label: 'Habitação Multifamiliar em Edifício Adaptado com Retrofit', category: 'tipologia', image: tipologia04 },
+  { id: 'tipologia-05', label: 'Habitação Unifamiliar de Conjuntos Habitacionais', category: 'tipologia', image: tipologia05 },
+  { id: 'tipologia-06', label: 'Habitação Unifamiliar de Fachada na calçada coroada com platibanda', category: 'tipologia', image: tipologia06 },
+  { id: 'tipologia-07', label: 'Terras Indígenas (PCTs)', category: 'tipologia', image: tipologia07 },
+  { id: 'tipologia-08', label: 'Habitação Unifamiliar com produção em área costeira', category: 'tipologia', image: tipologia08 },
+  { id: 'tipologia-09', label: 'Habitação Unifamiliar com produção em zona rural', category: 'tipologia', image: tipologia09 },
+  { id: 'tipologia-10', label: 'Habitação Unifamiliar em Bairro Residencial Formal', category: 'tipologia', image: tipologia10 },
+  { id: 'tipologia-11', label: 'Autoconstrução em Favelas e Comunidades Urbanas', category: 'tipologia', image: tipologia11 },
+  { id: 'tipologia-12', label: 'Ocupação com Domicílios Rústicos sem paredes estruturais', category: 'tipologia', image: tipologia12 },
+  { id: 'tipologia-13', label: 'Comunidade de Pescadores Artesanais', category: 'tipologia', image: tipologia13 },
+  { id: 'tipologia-14', label: 'Habitação Multifamiliar em Área Central', category: 'tipologia', image: tipologia14 },
+  { id: 'tipologia-15', label: 'Habitação Unifamiliar em Unidade Produtiva Coletiva Rural', category: 'tipologia', image: tipologia15 },
   { id: 'mudanca-casa-nova', label: 'Casa Nova', category: 'mudanca', image: mudancaCasaNova },
   { id: 'mudanca-reforma', label: 'Reforma', category: 'mudanca', image: mudancaReforma },
 ];

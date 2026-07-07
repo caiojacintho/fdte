@@ -155,10 +155,16 @@ export function TabuleiroPage() {
   );
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [showRequired, setShowRequired] = useState(false);
+  const [showMaxCards, setShowMaxCards] = useState(false);
 
   const step = STEPS[stepIndex];
   const cardPool = CARDS;
   const lookupCard = getCard;
+
+  // Cada nova etapa começa no topo da página.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [stepIndex]);
 
   const usedCardIds = useMemo(
     () =>
@@ -206,9 +212,10 @@ export function TabuleiroPage() {
     if (!cardId) return;
     const overId = String(over.id);
     if (overId === LIST_ZONE) {
-      // Coloca a carta no primeiro espaço livre da lista (precisa / painel).
+      // Coloca a carta no primeiro espaço livre da lista; se já tem 12, avisa.
       const empty = (step.slots ?? []).find((s) => !getPlacedCardId(step.board, s.key));
       if (empty) setCard(step.board, empty.key, cardId);
+      else setShowMaxCards(true);
       return;
     }
     setCard(step.board, overId, cardId);
@@ -231,6 +238,7 @@ export function TabuleiroPage() {
     if (step.kind === 'list') {
       const empty = (step.slots ?? []).find((s) => !getPlacedCardId(step.board, s.key));
       if (empty) setCard(step.board, empty.key, cardId);
+      else setShowMaxCards(true);
     } else {
       setCard(step.board, step.slot!, cardId);
     }
@@ -343,6 +351,20 @@ export function TabuleiroPage() {
             <p className="modal-text">Selecione ao menos uma carta para continuar</p>
             <button className="btn" type="button" onClick={() => setShowRequired(false)}>
               Entendi
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showMaxCards && (
+        <div className="modal-overlay" onClick={() => setShowMaxCards(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <p className="modal-text" style={{ whiteSpace: 'normal' }}>
+              Você já selecionou as 12 cartas. Para escolher outra, remova uma das cartas já
+              selecionadas.
+            </p>
+            <button className="btn" type="button" onClick={() => setShowMaxCards(false)}>
+              Entendido
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BrandHeader } from '../components/layout/BrandHeader';
 
@@ -38,9 +38,13 @@ export function OnboardingPage() {
   const slide = SLIDES[index];
   const isLast = index === SLIDES.length - 1;
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [index]);
+
   return (
     // Layout: header de marca no topo + card centralizado abaixo.
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+    <div className="mural-bg" style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <BrandHeader />
       <div
         style={{

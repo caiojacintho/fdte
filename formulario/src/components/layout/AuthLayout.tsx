@@ -12,7 +12,7 @@ export function AuthLayout({
   children: ReactNode;
 }) {
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+    <div className="mural-bg" style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       {header}
       <div
         style={{

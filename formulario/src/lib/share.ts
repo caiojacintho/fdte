@@ -1,28 +1,30 @@
-import sedurLogo from '../assets/logos/sedur.svg';
-import planehabLogo from '../assets/logos/planehab.svg';
-import fdteLogo from '../assets/logos/fdte.png';
+import boardImg from '../assets/board/tabuleiro.jpg';
 
-export interface ComprovanteData {
+export interface BoardData {
   name: string;
   city: string;
   entity: string;
-  dateLabel: string;
+  comoEHoje: string | null; // URL da carta escolhida na etapa 1
+  comoMudar: string | null; // URL da carta escolhida na etapa 2
+  precisa: string[]; // URLs das cartas da etapa 3, em ordem
 }
 
-// Paleta (espelha as variáveis do theme.css).
-const C = {
-  paper: '#faf1e0',
-  ink: '#3b2a20',
-  inkSoft: '#6b4f3a',
-  inkFaint: '#9a8268',
-  primaryDark: '#934c22',
-  success: '#3f9142',
-  divider: '#ecd2a4',
+// Coordenadas dos slots como frações (0-1). As cartas são desenhadas com tamanho
+// suficiente para COBRIR o contorno pontilhado (a forma opaca da carta o esconde).
+const COLS = [0.369, 0.531, 0.693, 0.855];
+const ROWS = [0.368, 0.583, 0.798];
+const CELL = 0.149; // lado do quadrado da carta (fração da largura)
+const CARD_RATIO = 0.755; // proporção (largura/altura) da carta da etapa 1
+const SLOT1 = { cx: 0.162, cy: 0.449, h: 0.432 }; // "Como é hoje" (retângulo)
+const CIRCLE = { cx: 0.156, cy: 0.812, d: 0.162 }; // "Como mudar" (círculo)
+// Cada valor é escrito à direita do respectivo rótulo (NOME/ENTIDADE/CIDADE),
+// alinhado à esquerda e truncado com reticências para não invadir o campo seguinte.
+const FIELDS = {
+  y: 0.132,
+  nome: { x: 0.335, maxW: 0.185 },
+  entidade: { x: 0.615, maxW: 0.105 },
+  cidade: { x: 0.8, maxW: 0.15 },
 };
-
-const FONT = '"DM Sans", system-ui, sans-serif';
-const WIDTH = 520;
-const PAD_X = 44;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -33,179 +35,87 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-  const words = text.split(/\s+/);
-  const lines: string[] = [];
-  let current = '';
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (ctx.measureText(candidate).width > maxWidth && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = candidate;
-    }
-  }
-  if (current) lines.push(current);
-  return lines;
+// Desenha uma imagem contida (preservando proporção) e centralizada numa caixa.
+async function drawContain(
+  ctx: CanvasRenderingContext2D,
+  src: string,
+  cx: number,
+  cy: number,
+  boxW: number,
+  boxH: number,
+  pad = 0.92
+) {
+  const im = await loadImage(src);
+  const bw = boxW * pad;
+  const bh = boxH * pad;
+  const s = Math.min(bw / im.width, bh / im.height);
+  const w = im.width * s;
+  const h = im.height * s;
+  ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h);
 }
 
-// Desenha o comprovante num canvas (renderização manual — confiável e sem
-// dependência de captura de DOM). Retorna o canvas e suas dimensões em px CSS.
-async function renderComprovante(
-  data: ComprovanteData
-): Promise<{ canvas: HTMLCanvasElement; width: number; height: number }> {
+function drawFieldText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  size: number
+) {
+  if (!text) return;
+  ctx.font = `600 ${size}px "DM Sans", sans-serif`;
+  let t = text;
+  if (ctx.measureText(t).width > maxWidth) {
+    while (t.length > 1 && ctx.measureText(t + '…').width > maxWidth) t = t.slice(0, -1);
+    t = t.replace(/\s+$/, '') + '…';
+  }
+  ctx.fillText(t, x, y);
+}
+
+// Monta o tabuleiro do jogo preenchido com os dados e as cartas do participante.
+async function renderBoard(data: BoardData): Promise<HTMLCanvasElement> {
   await (document as Document & { fonts?: FontFaceSet }).fonts?.ready;
-  const [sedur, planehab, fdte] = await Promise.all([
-    loadImage(sedurLogo),
-    loadImage(planehabLogo),
-    loadImage(fdteLogo),
-  ]);
+  const board = await loadImage(boardImg);
+  const W = board.naturalWidth || 2400;
+  const H = board.naturalHeight || 1698;
 
-  const contentW = WIDTH - PAD_X * 2;
-  const measure = document.createElement('canvas').getContext('2d')!;
-
-  const setFont = (ctx: CanvasRenderingContext2D, weight: number, size: number) => {
-    ctx.font = `${weight} ${size}px ${FONT}`;
-  };
-
-  // Pré-calcula as quebras de linha para dimensionar a altura do canvas.
-  setFont(measure, 700, 24);
-  const titleLines = wrapText(measure, 'Consulta Popular da Habitação', contentW);
-  setFont(measure, 800, 22);
-  const nameLines = wrapText(measure, data.name || '—', contentW);
-  setFont(measure, 400, 16);
-  const metaLines = wrapText(measure, [data.entity, data.city].filter(Boolean).join('  ·  '), contentW);
-
-  const logoH = 40;
-  let y = 44; // padding topo
-  y += logoH + 22; // linha de logos
-  y += 64 + 16; // círculo de check
-  y += titleLines.length * 30 + 6; // título
-  y += 18 + 22; // subtítulo
-  y += 22 + 4; // "Registramos a participação de"
-  y += nameLines.length * 28 + 4; // nome
-  y += metaLines.length * 22 + 18; // entidade · cidade
-  y += 18 + 22; // data
-  y += 16 + 18; // divisória + rodapé
-  const height = y + 30; // padding inferior
-
-  const dpr = 2;
   const canvas = document.createElement('canvas');
-  canvas.width = WIDTH * dpr;
-  canvas.height = height * dpr;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d')!;
-  ctx.scale(dpr, dpr);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
-  const cx = WIDTH / 2;
+  ctx.drawImage(board, 0, 0, W, H);
 
-  // Fundo + borda arredondada.
-  const r = 28;
-  ctx.beginPath();
-  ctx.moveTo(r, 0);
-  ctx.arcTo(WIDTH, 0, WIDTH, height, r);
-  ctx.arcTo(WIDTH, height, 0, height, r);
-  ctx.arcTo(0, height, 0, 0, r);
-  ctx.arcTo(0, 0, WIDTH, 0, r);
-  ctx.closePath();
-  ctx.fillStyle = C.paper;
-  ctx.fill();
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = C.inkSoft;
-  ctx.stroke();
-
-  // Logos centralizados.
-  const dims = [sedur, planehab, fdte].map((img) => ({ img, w: (logoH * img.naturalWidth) / img.naturalHeight }));
-  const gap = 22;
-  const totalW = dims.reduce((s, d) => s + d.w, 0) + gap * (dims.length - 1);
-  let lx = cx - totalW / 2;
-  const logoY = 44;
-  for (const d of dims) {
-    ctx.drawImage(d.img, lx, logoY, d.w, logoH);
-    lx += d.w + gap;
+  // Etapa 1 — Como é hoje (retângulo).
+  if (data.comoEHoje) {
+    const bh = SLOT1.h * H;
+    await drawContain(ctx, data.comoEHoje, SLOT1.cx * W, SLOT1.cy * H, bh * CARD_RATIO, bh, 1);
   }
-  y = logoY + logoH + 22;
 
-  // Círculo de check.
-  const circleR = 32;
-  const circleCy = y + circleR;
-  ctx.beginPath();
-  ctx.arc(cx, circleCy, circleR, 0, Math.PI * 2);
-  ctx.fillStyle = C.success;
-  ctx.fill();
-  ctx.fillStyle = '#ffffff';
-  setFont(ctx, 700, 34);
+  // Etapa 2 — Como mudar (círculo).
+  if (data.comoMudar) {
+    const d = CIRCLE.d * W;
+    await drawContain(ctx, data.comoMudar, CIRCLE.cx * W, CIRCLE.cy * H, d, d, 1);
+  }
+
+  // Etapa 3 — O que a casa precisa (grade 4×3, ordem: linha por linha).
+  const side = CELL * W;
+  const cells: { fx: number; fy: number }[] = [];
+  for (const fy of ROWS) for (const fx of COLS) cells.push({ fx, fy });
+  for (let i = 0; i < data.precisa.length && i < cells.length; i++) {
+    await drawContain(ctx, data.precisa[i], cells[i].fx * W, cells[i].fy * H, side, side, 1);
+  }
+
+  // Campos de texto: valor à direita de cada rótulo, truncado com reticências.
+  ctx.fillStyle = '#3b2a20';
+  ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  ctx.fillText('✓', cx, circleCy + 2);
-  ctx.textBaseline = 'alphabetic';
-  y = circleCy + circleR + 16;
+  const size = Math.round(W * 0.013);
+  const y = FIELDS.y * H;
+  drawFieldText(ctx, data.name, FIELDS.nome.x * W, y, FIELDS.nome.maxW * W, size);
+  drawFieldText(ctx, data.entity, FIELDS.entidade.x * W, y, FIELDS.entidade.maxW * W, size);
+  drawFieldText(ctx, data.city, FIELDS.cidade.x * W, y, FIELDS.cidade.maxW * W, size);
 
-  // Título.
-  setFont(ctx, 700, 24);
-  ctx.fillStyle = C.primaryDark;
-  for (const line of titleLines) {
-    y += 24;
-    ctx.fillText(line, cx, y);
-    y += 6;
-  }
-  y += 6;
-
-  // Subtítulo.
-  setFont(ctx, 700, 12.5);
-  ctx.fillStyle = C.inkFaint;
-  ctx.letterSpacing = '1px';
-  y += 12;
-  ctx.fillText('COMPROVANTE DE PARTICIPAÇÃO', cx, y);
-  ctx.letterSpacing = '0px';
-  y += 30;
-
-  // Linha de introdução.
-  setFont(ctx, 400, 16);
-  ctx.fillStyle = C.inkSoft;
-  y += 16;
-  ctx.fillText('Registramos a participação de', cx, y);
-  y += 10;
-
-  // Nome.
-  setFont(ctx, 800, 22);
-  ctx.fillStyle = C.ink;
-  for (const line of nameLines) {
-    y += 24;
-    ctx.fillText(line, cx, y);
-    y += 4;
-  }
-
-  // Entidade · cidade.
-  setFont(ctx, 400, 16);
-  ctx.fillStyle = C.inkSoft;
-  for (const line of metaLines) {
-    y += 18;
-    ctx.fillText(line, cx, y);
-    y += 4;
-  }
-  y += 16;
-
-  // Data.
-  setFont(ctx, 400, 14);
-  ctx.fillStyle = C.inkFaint;
-  y += 14;
-  ctx.fillText(`Enviado em ${data.dateLabel}`, cx, y);
-  y += 24;
-
-  // Divisória + rodapé.
-  ctx.strokeStyle = C.divider;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(PAD_X, y);
-  ctx.lineTo(WIDTH - PAD_X, y);
-  ctx.stroke();
-  y += 20;
-  setFont(ctx, 700, 12.8);
-  ctx.fillStyle = C.inkFaint;
-  ctx.fillText('PLANEHAB · Governo do Estado da Bahia', cx, y);
-
-  return { canvas, width: WIDTH, height };
+  return canvas;
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
@@ -214,10 +124,10 @@ function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number):
   });
 }
 
-export async function buildImageFile(data: ComprovanteData): Promise<File> {
-  const { canvas } = await renderComprovante(data);
-  const blob = await canvasToBlob(canvas, 'image/jpeg', 0.95);
-  return new File([blob], 'comprovante-planehab.jpg', { type: 'image/jpeg' });
+export async function buildImageFile(data: BoardData): Promise<File> {
+  const canvas = await renderBoard(data);
+  const blob = await canvasToBlob(canvas, 'image/jpeg', 0.94);
+  return new File([blob], 'tabuleiro-planehab.jpg', { type: 'image/jpeg' });
 }
 
 type ShareResult = 'shared' | 'downloaded';

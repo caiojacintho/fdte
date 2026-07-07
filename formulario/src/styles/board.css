@@ -676,6 +676,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  background: var(--color-paper);
+  border-bottom: 3px solid var(--color-ink);
 }
 
 .brand-header-gov {

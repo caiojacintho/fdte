@@ -11,11 +11,6 @@ import {
   PRECISA_SLOTS,
 } from '../data/boardLayout';
 
-function formatDate(raw: string | null | undefined): string {
-  const d = raw ? new Date(raw.replace(' ', 'T') + 'Z') : new Date();
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('pt-BR');
-}
-
 function MiniCard({ cardId }: { cardId: string | null }) {
   const card = getCard(cardId);
   if (!card) {
@@ -33,6 +28,8 @@ export function ResumoPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [boardUrl, setBoardUrl] = useState<string | null>(null);
 
   if (loading) return <p style={{ padding: 24 }}>Carregando...</p>;
 
@@ -61,16 +58,42 @@ export function ResumoPage() {
     }
   }
 
+  function getBoardData() {
+    return {
+      name: submission?.name ?? '',
+      city: submission?.city ?? '',
+      entity: submission?.entity ?? '',
+      comoEHoje: getCard(getPlacedCardId(TABULEIRO_BOARD, COMO_E_HOJE_SLOT.key))?.image ?? null,
+      comoMudar: getCard(getPlacedCardId(TABULEIRO_BOARD, COMO_MUDAR_SLOT.key))?.image ?? null,
+      precisa: PRECISA_SLOTS.map((s) => getCard(getPlacedCardId(TABULEIRO_BOARD, s.key))?.image).filter(
+        (img): img is string => Boolean(img)
+      ),
+    };
+  }
+
+  async function handlePreview() {
+    setShareNote(null);
+    setPreviewLoading(true);
+    try {
+      const file = await buildImageFile(getBoardData());
+      setBoardUrl(URL.createObjectURL(file));
+    } catch {
+      setShareNote('Não foi possível gerar o tabuleiro. Tente novamente.');
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  function closePreview() {
+    if (boardUrl) URL.revokeObjectURL(boardUrl);
+    setBoardUrl(null);
+  }
+
   async function handleShare() {
     setShareNote(null);
     setSharing(true);
     try {
-      const file = await buildImageFile({
-        name: submission?.name ?? '',
-        city: submission?.city ?? '',
-        entity: submission?.entity ?? '',
-        dateLabel: formatDate(submission?.completed_at),
-      });
+      const file = await buildImageFile(getBoardData());
       await shareFile(
         file,
         'Consulta Popular da Habitação',
@@ -209,6 +232,15 @@ export function ResumoPage() {
             >
               {sharing ? 'Gerando...' : 'Compartilhar'}
             </button>
+            <button
+              className="btn btn-ghost btn-block"
+              type="button"
+              style={{ marginTop: 12 }}
+              disabled={previewLoading}
+              onClick={handlePreview}
+            >
+              {previewLoading ? 'Gerando...' : 'Visualizar tabuleiro'}
+            </button>
             {shareNote && (
               <p style={{ color: 'var(--color-ink-soft)', fontSize: '0.9rem', textAlign: 'center', marginTop: 12 }}>
                 {shareNote}
@@ -268,6 +300,26 @@ export function ResumoPage() {
               <p style={{ color: 'var(--color-ink-soft)', fontSize: '0.9rem', margin: 0 }}>{shareNote}</p>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Visualização do tabuleiro gerado (mesma imagem do compartilhamento). */}
+      {boardUrl && (
+        <div className="modal-overlay" onClick={closePreview}>
+          <img
+            src={boardUrl}
+            alt="Tabuleiro preenchido"
+            className="board-preview-img"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            className="btn"
+            type="button"
+            onClick={closePreview}
+            style={{ position: 'fixed', top: 16, right: 16 }}
+          >
+            Fechar
+          </button>
         </div>
       )}
     </div>

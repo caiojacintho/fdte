@@ -53,6 +53,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Fundo de mural (tela de identificação e onboarding). */
+.mural-bg {
+  background-image: url('../assets/bg/mural.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 h1,
 h2,
 h3,
@@ -192,6 +200,22 @@ a {
   border: 3px solid var(--color-ink);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
+}
+
+/* Preview do tabuleiro: em modo retrato (celular) gira 90° para aparecer grande. */
+.board-preview-img {
+  max-width: 96vw;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+@media (orientation: portrait) {
+  .board-preview-img {
+    max-width: 90vh;
+    max-height: 96vw;
+    transform: rotate(90deg);
+  }
 }
 
 .field {
