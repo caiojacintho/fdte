@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lock, LogIn, Mail } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { BrandLogos } from '../components/BrandLogos';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -25,43 +27,62 @@ export function LoginPage() {
   }
 
   return (
-    <div style={{ minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div className="card-surface" style={{ maxWidth: 420, width: '100%', padding: '36px 32px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div
-            style={{
-              fontFamily: 'var(--font-heading)',
-              fontSize: '0.85rem',
-              letterSpacing: '0.12em',
-              color: 'var(--color-secondary-dark)',
-              textTransform: 'uppercase',
-              marginBottom: 6,
-            }}
-          >
-            PLANEHAB · Bahia
-          </div>
-          <h1 style={{ fontSize: '1.6rem', color: 'var(--color-primary-dark)' }}>Painel do Gestor</h1>
-          <p style={{ marginTop: 8, color: 'var(--color-ink-soft)' }}>Acesso restrito à equipe gestora</p>
+    <div
+      style={{
+        minHeight: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+        gap: 28,
+      }}
+    >
+      <BrandLogos height={40} />
+
+      <div className="card" style={{ maxWidth: 400, width: '100%', padding: '32px 30px' }}>
+        <div style={{ marginBottom: 24 }}>
+          <h1 style={{ fontSize: '1.35rem' }}>Painel do Gestor</h1>
+          <p style={{ marginTop: 6, color: 'var(--text-soft)', fontSize: '0.9rem' }}>
+            Acesso restrito à equipe gestora
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="field">
             <label htmlFor="email">E-mail</label>
-            <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <div className="input-icon">
+              <Mail size={16} />
+              <input
+                id="email"
+                className="input"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="voce@exemplo.gov.br"
+              />
+            </div>
           </div>
           <div className="field">
             <label htmlFor="password">Senha</label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="input-icon">
+              <Lock size={16} />
+              <input
+                id="password"
+                className="input"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
           </div>
           {error && <span className="error-text">{error}</span>}
           <button className="btn btn-block" type="submit" disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'}
+            <LogIn size={16} />
+            {loading ? 'Entrando…' : 'Entrar'}
           </button>
         </form>
       </div>

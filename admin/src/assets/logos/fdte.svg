@@ -1,0 +1,6 @@
+<svg width="150" height="60" viewBox="0 0 150 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- PLACEHOLDER: substituir pelo logo oficial do FDTE quando fornecido -->
+  <rect x="1" y="1" width="148" height="58" rx="10" fill="#f9fafb" stroke="#d3d9e3" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="75" y="30" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" font-weight="800" fill="#1a2233" letter-spacing="1">FDTE</text>
+  <text x="75" y="45" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" font-weight="600" fill="#98a2b5" letter-spacing="0.5">logo em breve</text>
+</svg>

@@ -13,6 +13,7 @@ function publicUser(user) {
     city: user.city,
     cpf: user.cpf ?? '',
     role: user.role,
+    created_at: user.created_at,
   };
 }
 
@@ -94,4 +95,29 @@ authRouter.patch('/me', authMiddleware, (req, res) => {
 
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.sub);
   res.json({ user: publicUser(user) });
+});
+
+// Altera a senha do usuário autenticado (exige a senha atual).
+authRouter.patch('/password', authMiddleware, (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Informe a senha atual e a nova senha.' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'A nova senha deve ter pelo menos 6 caracteres.' });
+  }
+
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.sub);
+  if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+  if (!verifyPassword(currentPassword, user.password_hash)) {
+    return res.status(401).json({ error: 'A senha atual está incorreta.' });
+  }
+
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(
+    hashPassword(newPassword),
+    req.user.sub
+  );
+
+  res.json({ ok: true });
 });

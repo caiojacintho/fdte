@@ -1,162 +1,194 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Building2, ChevronRight, MapPin, Send, Users, X } from 'lucide-react';
 import { Header } from '../components/Header';
-import { api, type StatsDTO, type SubmissionListItem } from '../api/client';
-import { CATEGORY_COLORS, CATEGORY_LABELS, getCard } from '../data/cards';
+import { ExportMenu } from '../components/ExportMenu';
+import { api, type SubmissionListItem } from '../api/client';
+
+function distinct(values: (string | null)[]): string[] {
+  return Array.from(new Set(values.filter((v): v is string => Boolean(v && v.trim())))).sort((a, b) =>
+    a.localeCompare(b, 'pt-BR')
+  );
+}
 
 export function DashboardPage() {
-  const [submissions, setSubmissions] = useState<SubmissionListItem[]>([]);
-  const [stats, setStats] = useState<StatsDTO | null>(null);
-  const [filters, setFilters] = useState({ entity: '', city: '', status: '' });
+  const [rows, setRows] = useState<SubmissionListItem[]>([]);
   const [loading, setLoading] = useState(true);
-
-  async function load() {
-    setLoading(true);
-    try {
-      const [{ submissions }, statsData] = await Promise.all([api.listSubmissions(filters), api.getStats()]);
-      setSubmissions(submissions);
-      setStats(statsData);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [error, setError] = useState<string | null>(null);
+  const [city, setCity] = useState('');
+  const [entity, setEntity] = useState('');
 
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let active = true;
+    setLoading(true);
+    api
+      .listSubmissions()
+      .then(({ submissions }) => {
+        if (active) setRows(submissions);
+      })
+      .catch((e) => active && setError(e instanceof Error ? e.message : 'Erro ao carregar dados.'))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
   }, []);
 
-  function handleFilterSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    load();
-  }
+  const cities = useMemo(() => distinct(rows.map((r) => r.city)), [rows]);
+  const entities = useMemo(() => distinct(rows.map((r) => r.entity)), [rows]);
 
-  const topCards = (stats?.cardCounts ?? []).slice(0, 8);
+  const filtered = useMemo(
+    () => rows.filter((r) => (!city || r.city === city) && (!entity || r.entity === entity)),
+    [rows, city, entity]
+  );
+
+  const stats = useMemo(
+    () => ({
+      sent: filtered.filter((r) => r.status === 'completed').length,
+      cities: distinct(filtered.map((r) => r.city)).length,
+      entities: distinct(filtered.map((r) => r.entity)).length,
+    }),
+    [filtered]
+  );
+
+  const hasFilters = Boolean(city || entity);
 
   return (
     <div>
-      <Header />
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px 80px' }}>
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 28 }}>
-          <StatCard label="Submissões" value={stats?.totals.total_submissions ?? '—'} />
-          <StatCard label="Concluídas" value={stats?.totals.completed_submissions ?? '—'} />
-          <StatCard label="Cidades" value={stats?.totals.total_cities ?? '—'} />
-          <StatCard label="Entidades" value={stats?.totals.total_entities ?? '—'} />
+      <Header actions={<ExportMenu rows={rows} cities={cities} />} />
+
+      <main style={{ maxWidth: 1180, margin: '0 auto', padding: '28px 24px 80px' }}>
+        {/* Cards de estatísticas */}
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+          <StatCard
+            icon={<Send size={20} />}
+            tint="var(--primary)"
+            tintSoft="var(--primary-soft)"
+            value={stats.sent}
+            label="Respostas enviadas"
+          />
+          <StatCard
+            icon={<MapPin size={20} />}
+            tint="var(--accent)"
+            tintSoft="var(--accent-soft)"
+            value={stats.cities}
+            label="Cidades"
+          />
+          <StatCard
+            icon={<Building2 size={20} />}
+            tint="var(--warning)"
+            tintSoft="var(--warning-soft)"
+            value={stats.entities}
+            label="Entidades"
+          />
         </div>
 
-        {topCards.length > 0 && (
-          <div className="card-surface" style={{ padding: 20, marginBottom: 28 }}>
-            <h3 style={{ marginBottom: 14, color: 'var(--color-primary-dark)' }}>Itens mais escolhidos</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {topCards.map((c) => {
-                const card = getCard(c.card_id);
-                const max = topCards[0].total || 1;
-                return (
-                  <div key={`${c.board}-${c.card_id}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ width: 150, fontSize: '0.85rem' }}>{card?.label ?? c.card_id}</span>
-                    <div style={{ flex: 1, background: 'var(--color-bg)', borderRadius: 6, overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          width: `${(c.total / max) * 100}%`,
-                          background: card ? CATEGORY_COLORS[card.category] : 'var(--color-ink-faint)',
-                          height: 14,
-                        }}
-                      />
-                    </div>
-                    <span style={{ width: 24, textAlign: 'right', fontSize: '0.85rem' }}>{c.total}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h2 style={{ color: 'var(--color-primary-dark)' }}>Submissões</h2>
-          <button className="btn btn-secondary" type="button" onClick={() => api.downloadExportCsv()}>
-            Exportar CSV
-          </button>
-        </div>
-
-        <form
-          onSubmit={handleFilterSubmit}
-          style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}
+        {/* Filtros */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            flexWrap: 'wrap',
+            alignItems: 'flex-end',
+            marginBottom: 16,
+          }}
         >
-          <input
-            placeholder="Filtrar por entidade"
-            value={filters.entity}
-            onChange={(e) => setFilters((f) => ({ ...f, entity: e.target.value }))}
-            style={{ padding: 10, borderRadius: 8, border: '2px solid var(--color-ink-faint)' }}
-          />
-          <input
-            placeholder="Filtrar por cidade"
-            value={filters.city}
-            onChange={(e) => setFilters((f) => ({ ...f, city: e.target.value }))}
-            style={{ padding: 10, borderRadius: 8, border: '2px solid var(--color-ink-faint)' }}
-          />
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
-            style={{ padding: 10, borderRadius: 8, border: '2px solid var(--color-ink-faint)' }}
-          >
-            <option value="">Todos os status</option>
-            <option value="in_progress">Em andamento</option>
-            <option value="completed">Concluídas</option>
-          </select>
-          <button className="btn btn-ghost" type="submit">
-            Filtrar
-          </button>
-        </form>
+          <div className="field" style={{ minWidth: 200 }}>
+            <label htmlFor="filter-city">Cidade</label>
+            <select id="filter-city" className="input" value={city} onChange={(e) => setCity(e.target.value)}>
+              <option value="">Todas as cidades</option>
+              {cities.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field" style={{ minWidth: 200 }}>
+            <label htmlFor="filter-entity">Entidade</label>
+            <select
+              id="filter-entity"
+              className="input"
+              value={entity}
+              onChange={(e) => setEntity(e.target.value)}
+            >
+              <option value="">Todas as entidades</option>
+              {entities.map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </select>
+          </div>
+          {hasFilters && (
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => {
+                setCity('');
+                setEntity('');
+              }}
+            >
+              <X size={16} />
+              Limpar filtros
+            </button>
+          )}
+        </div>
 
-        <div className="card-surface" style={{ overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        {/* Tabela */}
+        <div className="table-wrap">
+          <table className="table">
             <thead>
-              <tr style={{ background: 'var(--color-bg-deep)', textAlign: 'left' }}>
-                <Th>Nome</Th>
-                <Th>Entidade</Th>
-                <Th>Cidade</Th>
-                <Th>Status</Th>
-                <Th>Atualizado em</Th>
-                <Th />
+              <tr>
+                <th>Participante</th>
+                <th>Entidade</th>
+                <th>Cidade</th>
+                <th>Status</th>
+                <th>Enviado em</th>
+                <th style={{ width: 40 }} />
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={6} style={{ padding: 20, textAlign: 'center' }}>
-                    Carregando...
-                  </td>
-                </tr>
-              ) : submissions.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ padding: 20, textAlign: 'center' }}>
-                    Nenhuma submissão encontrada.
-                  </td>
-                </tr>
+                <EmptyRow message="Carregando…" />
+              ) : error ? (
+                <EmptyRow message={error} />
+              ) : filtered.length === 0 ? (
+                <EmptyRow
+                  icon={<Users size={28} />}
+                  message={
+                    rows.length === 0
+                      ? 'Nenhuma resposta recebida ainda.'
+                      : 'Nenhuma resposta corresponde aos filtros.'
+                  }
+                />
               ) : (
-                submissions.map((s) => (
-                  <tr key={s.id} style={{ borderTop: '1px solid var(--color-bg-deep)' }}>
-                    <Td>{s.name}</Td>
-                    <Td>{s.entity}</Td>
-                    <Td>{s.city}</Td>
-                    <Td>
-                      <span
-                        className="badge"
-                        style={
-                          s.status === 'completed'
-                            ? { background: '#d9efda', color: 'var(--color-success)' }
-                            : undefined
-                        }
+                filtered.map((s) => (
+                  <tr key={s.id}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{s.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-faint)' }}>{s.email}</div>
+                    </td>
+                    <td>{s.entity}</td>
+                    <td>{s.city}</td>
+                    <td>
+                      {s.status === 'completed' ? (
+                        <span className="badge badge-success">Enviada</span>
+                      ) : (
+                        <span className="badge badge-warning">Em andamento</span>
+                      )}
+                    </td>
+                    <td style={{ color: 'var(--text-soft)' }}>
+                      {s.completed_at ? new Date(s.completed_at).toLocaleString('pt-BR') : '—'}
+                    </td>
+                    <td>
+                      <Link
+                        to={`/submissoes/${s.id}`}
+                        aria-label={`Ver detalhes de ${s.name}`}
+                        style={{ display: 'inline-flex', color: 'var(--text-faint)' }}
                       >
-                        {s.status === 'completed' ? 'Concluída' : 'Em andamento'}
-                      </span>
-                    </Td>
-                    <Td>{new Date(s.updated_at).toLocaleString('pt-BR')}</Td>
-                    <Td>
-                      <Link to={`/submissoes/${s.id}`} style={{ color: 'var(--color-secondary-dark)', fontWeight: 700 }}>
-                        Ver detalhes →
+                        <ChevronRight size={18} />
                       </Link>
-                    </Td>
+                    </td>
                   </tr>
                 ))
               )}
@@ -164,31 +196,50 @@ export function DashboardPage() {
           </table>
         </div>
 
-        <p style={{ marginTop: 18, fontSize: '0.8rem', color: 'var(--color-ink-faint)' }}>
-          Categorias: {Object.entries(CATEGORY_LABELS).map(([k, v]) => v).join(' · ')}
-        </p>
+        {!loading && !error && filtered.length > 0 && (
+          <p style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-faint)' }}>
+            {filtered.length} {filtered.length === 1 ? 'resposta' : 'respostas'}
+            {hasFilters ? ` (de ${rows.length})` : ''}
+          </p>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function StatCard({
+  icon,
+  tint,
+  tintSoft,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  tint: string;
+  tintSoft: string;
+  value: number | string;
+  label: string;
+}) {
+  return (
+    <div className="stat-card">
+      <div className="stat-icon" style={{ background: tintSoft, color: tint }}>
+        {icon}
+      </div>
+      <div>
+        <div className="stat-value">{value}</div>
+        <div className="stat-label">{label}</div>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+function EmptyRow({ message, icon }: { message: string; icon?: React.ReactNode }) {
   return (
-    <div className="card-surface" style={{ padding: '16px 24px', minWidth: 140 }}>
-      <div style={{ fontSize: '1.8rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary-dark)' }}>
-        {value}
-      </div>
-      <div style={{ fontSize: '0.8rem', color: 'var(--color-ink-soft)' }}>{label}</div>
-    </div>
+    <tr>
+      <td colSpan={6} style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-faint)' }}>
+        {icon && <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}>{icon}</div>}
+        {message}
+      </td>
+    </tr>
   );
-}
-
-function Th({ children }: { children?: React.ReactNode }) {
-  return (
-    <th style={{ padding: '12px 16px', fontFamily: 'var(--font-heading)', fontSize: '0.8rem' }}>{children}</th>
-  );
-}
-
-function Td({ children }: { children?: React.ReactNode }) {
-  return <td style={{ padding: '12px 16px', fontSize: '0.9rem' }}>{children}</td>;
 }

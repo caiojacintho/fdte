@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SubmissionDetailPage } from './pages/SubmissionDetailPage';
+import { AccountPage } from './pages/AccountPage';
 
 export default function App() {
   return (
@@ -24,6 +25,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <SubmissionDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/conta"
+            element={
+              <ProtectedRoute>
+                <AccountPage />
               </ProtectedRoute>
             }
           />

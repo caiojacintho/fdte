@@ -35,7 +35,9 @@ export interface UserDTO {
   email: string;
   entity: string;
   city: string;
+  cpf: string;
   role: 'user' | 'admin';
+  created_at?: string;
 }
 
 export interface SubmissionListItem {
@@ -46,6 +48,7 @@ export interface SubmissionListItem {
   completed_at: string | null;
   name: string;
   email: string;
+  cpf: string | null;
   entity: string;
   city: string;
 }
@@ -85,6 +88,12 @@ export const api = {
 
   me: () => request<{ user: UserDTO }>('/api/auth/me'),
 
+  updatePassword: (payload: { currentPassword: string; newPassword: string }) =>
+    request<{ ok: true }>('/api/auth/password', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+
   listSubmissions: (params: { entity?: string; city?: string; status?: string } = {}) => {
     const query = new URLSearchParams(
       Object.entries(params).filter(([, v]) => v) as [string, string][]
@@ -95,21 +104,4 @@ export const api = {
   getSubmission: (id: number) => request<{ submission: SubmissionDetail }>(`/api/admin/submissions/${id}`),
 
   getStats: () => request<StatsDTO>('/api/admin/stats'),
-
-  async downloadExportCsv() {
-    const token = localStorage.getItem('fdte_admin_token');
-    const res = await fetch(`${API_URL}/api/admin/export.csv`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    if (!res.ok) throw new ApiError('Não foi possível exportar os dados.', res.status);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'submissoes.csv';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  },
 };
