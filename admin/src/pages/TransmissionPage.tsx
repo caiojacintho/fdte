@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, ChevronRight, Link as LinkIcon, Trash2, Users } from 'lucide-react';
+import { Check, ChevronRight, Copy, Link as LinkIcon, Trash2, Users, X } from 'lucide-react';
 import { Header } from '../components/Header';
 import { TransmissionSidebar } from '../components/TransmissionSidebar';
 import { ExportMenu } from '../components/ExportMenu';
 import {
   deleteTransmission,
   getTransmission,
+  subscribe,
   updateTransmission,
   type Transmission,
 } from '../transmissions/store';
@@ -54,6 +55,16 @@ function isSessionLive(session: Transmission): boolean {
   return now <= end;
 }
 
+// Estado da sessão para a badge: "upcoming" quando ainda não começou (data/horário
+// no futuro), "live" enquanto o link está aberto, "ended" depois de encerrada.
+type SessionStatus = 'live' | 'upcoming' | 'ended';
+function sessionStatus(session: Transmission): SessionStatus {
+  const now = new Date();
+  const start = new Date(`${session.date}T${session.start || '00:00'}:00`);
+  if (!Number.isNaN(start.getTime()) && now < start) return 'upcoming';
+  return isSessionLive(session) ? 'live' : 'ended';
+}
+
 // Intervalo de atualização em tempo real (ms).
 const POLL_MS = 4000;
 
@@ -67,11 +78,15 @@ export function TransmissionPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showGroups, setShowGroups] = useState(false);
+  const [copiedGroupIdx, setCopiedGroupIdx] = useState<number | null>(null);
   const [tab, setTab] = useState<'etapa1' | 'etapa2'>('etapa1');
 
-  // Recarrega os dados da sessão quando o id muda (troca de sessão na sidebar).
+  // Recarrega os dados da sessão quando o id muda (troca de sessão na sidebar)
+  // ou quando o store é alterado (ex.: grupos criados no modal de nova sessão).
   useEffect(() => {
     setSession(getTransmission(id));
+    return subscribe(() => setSession(getTransmission(id)));
   }, [id]);
 
   // Polling: busca as respostas periodicamente para refletir, em tempo real,
@@ -147,6 +162,16 @@ export function TransmissionPage() {
     }
   }
 
+  async function copyGroup(idx: number, url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedGroupIdx(idx);
+      setTimeout(() => setCopiedGroupIdx((cur) => (cur === idx ? null : cur)), 2000);
+    } catch {
+      /* clipboard indisponível — o usuário pode copiar manualmente */
+    }
+  }
+
   return (
     <div>
       <Header />
@@ -165,11 +190,13 @@ export function TransmissionPage() {
                   <div className="session-title-row">
                     <h1 className="session-title">{formatDate(session.date)}</h1>
                     <span className="session-sub">{timePhrase(session)}</span>
-                    {isSessionLive(session) ? (
+                    {sessionStatus(session) === 'live' ? (
                       <span className="live-badge">
                         <span className="live-dot" />
                         Ao vivo
                       </span>
+                    ) : sessionStatus(session) === 'upcoming' ? (
+                      <span className="live-badge upcoming">Em breve</span>
                     ) : (
                       <span className="live-badge ended">Encerrado</span>
                     )}
@@ -221,6 +248,16 @@ export function TransmissionPage() {
                     </button>
                   )}
                   <ExportMenu rows={rows} iconOnly disabled={isSessionLive(session)} />
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    onClick={() => {
+                      setCopiedGroupIdx(null);
+                      setShowGroups(true);
+                    }}
+                  >
+                    Jogo do bairro
+                  </button>
                   {isSessionLive(session) && (
                     <button className="btn" type="button" onClick={endSession}>
                       Encerrar sessão
@@ -239,65 +276,152 @@ export function TransmissionPage() {
                 </div>
               </div>
 
-              {/* Tabela de participantes que já enviaram (atualiza em tempo real) */}
-              <div className="table-wrap table-open">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Participante</th>
-                      <th>Entidade</th>
-                      <th>Cidade</th>
-                      <th>Enviado em</th>
-                      <th style={{ width: 40 }} />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <EmptyRow message="Carregando…" />
-                    ) : error ? (
-                      <EmptyRow message={error} />
-                    ) : sent.length === 0 ? (
-                      <EmptyRow
-                        icon={<Users size={28} />}
-                        message="Aguardando os primeiros envios. Esta lista atualiza sozinha."
-                      />
-                    ) : (
-                      sent.map((s) => (
-                        <tr
-                          key={s.id}
-                          className="row-clickable"
-                          onClick={() => navigate(`/submissoes/${s.id}`)}
-                        >
-                          <td>
-                            <div style={{ fontWeight: 600 }}>{s.name}</div>
-                          </td>
-                          <td>{s.entity}</td>
-                          <td>{s.city}</td>
-                          <td style={{ color: 'var(--text-soft)' }}>
-                            {s.completed_at ? new Date(s.completed_at).toLocaleString('pt-BR') : '—'}
-                          </td>
-                          <td>
-                            <span style={{ display: 'inline-flex', color: 'var(--text-faint)' }}>
-                              <ChevronRight size={18} />
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              {/* Etapa 2: lista os grupos criados para o Jogo do Bairro (no máximo 6 linhas). */}
+              {tab === 'etapa2' && (
+                <div className="table-wrap table-open">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Grupo</th>
+                        <th>Link de acesso</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {session.groups && session.groups.length > 0 ? (
+                        session.groups.slice(0, 6).map((g, i) => (
+                          <tr key={i}>
+                            <td>
+                              <div style={{ fontWeight: 600 }}>{g.name}</div>
+                            </td>
+                            <td style={{ color: 'var(--text-soft)' }}>{g.url}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <EmptyRow
+                          icon={<Users size={28} />}
+                          message="Nenhum grupo criado para esta sessão."
+                        />
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
 
-              {!loading && !error && sent.length > 0 && (
-                <p style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-faint)' }}>
-                  {sent.length} {sent.length === 1 ? 'resposta enviada' : 'respostas enviadas'} · atualiza a cada{' '}
-                  {POLL_MS / 1000}s
-                </p>
+              {/* Etapa 1: participantes que já enviaram (atualiza em tempo real) */}
+              {tab === 'etapa1' && (
+                <>
+                  <div className="table-wrap table-open">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Participante</th>
+                          <th>Entidade</th>
+                          <th>Cidade</th>
+                          <th>Enviado em</th>
+                          <th style={{ width: 40 }} />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loading ? (
+                          <EmptyRow message="Carregando…" />
+                        ) : error ? (
+                          <EmptyRow message={error} />
+                        ) : sent.length === 0 ? (
+                          <EmptyRow
+                            icon={<Users size={28} />}
+                            message="Aguardando os primeiros envios. Esta lista atualiza sozinha."
+                          />
+                        ) : (
+                          sent.map((s) => (
+                            <tr
+                              key={s.id}
+                              className="row-clickable"
+                              onClick={() => navigate(`/submissoes/${s.id}`)}
+                            >
+                              <td>
+                                <div style={{ fontWeight: 600 }}>{s.name}</div>
+                              </td>
+                              <td>{s.entity}</td>
+                              <td>{s.city}</td>
+                              <td style={{ color: 'var(--text-soft)' }}>
+                                {s.completed_at ? new Date(s.completed_at).toLocaleString('pt-BR') : '—'}
+                              </td>
+                              <td>
+                                <span style={{ display: 'inline-flex', color: 'var(--text-faint)' }}>
+                                  <ChevronRight size={18} />
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {!loading && !error && sent.length > 0 && (
+                    <p style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-faint)' }}>
+                      {sent.length} {sent.length === 1 ? 'resposta enviada' : 'respostas enviadas'} · atualiza a cada{' '}
+                      {POLL_MS / 1000}s
+                    </p>
+                  )}
+                </>
               )}
             </>
           )}
         </main>
       </div>
+
+      {/* Links dos grupos do Jogo do Bairro criados para esta sessão */}
+      {showGroups && (
+        <div className="modal-overlay" onClick={() => setShowGroups(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div>
+                <h2 style={{ fontSize: '1.15rem' }}>Links dos grupos</h2>
+              </div>
+              <button
+                className="modal-close"
+                type="button"
+                aria-label="Fechar"
+                onClick={() => setShowGroups(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {session?.groups?.length ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 16 }}>
+                {session.groups.map((g, i) => (
+                  <div className="field" key={i}>
+                    <label>{g.name}</label>
+                    <div className="copy-field">
+                      <input
+                        className="input"
+                        readOnly
+                        value={g.url}
+                        onFocus={(e) => e.target.select()}
+                      />
+                      <button
+                        className="btn btn-secondary"
+                        type="button"
+                        onClick={() => copyGroup(i, g.url)}
+                        aria-label={copiedGroupIdx === i ? 'Copiado' : 'Copiar link'}
+                        title={copiedGroupIdx === i ? 'Copiado' : 'Copiar'}
+                      >
+                        {copiedGroupIdx === i ? <Check size={16} /> : <Copy size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-soft)', fontSize: '0.88rem', marginTop: 12 }}>
+                Nenhum formulário do Jogo do Bairro foi criado para esta sessão.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Confirmação de exclusão da sessão */}
       {confirmDelete && (

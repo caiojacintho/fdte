@@ -3,6 +3,11 @@ import { useEffect, useState } from 'react';
 // Feature front-only: as transmissões são persistidas no localStorage do navegador.
 // Quando o backend existir, este módulo passa a ler/gravar via API.
 
+export type Group = {
+  name: string; // ex.: "Grupo 1"
+  url: string; // link de acesso próprio do grupo
+};
+
 export type Transmission = {
   id: string;
   date: string; // ISO yyyy-mm-dd
@@ -10,6 +15,7 @@ export type Transmission = {
   end: string; // HH:mm
   description: string; // observação livre sobre a sessão
   url: string;
+  groups?: Group[]; // formulários do "Jogo do Bairro" criados para esta sessão
   createdAt: number;
 };
 
@@ -60,7 +66,7 @@ export function deleteTransmission(id: string): void {
   write(read().filter((t) => t.id !== id));
 }
 
-function subscribe(cb: () => void): () => void {
+export function subscribe(cb: () => void): () => void {
   window.addEventListener(EVENT, cb);
   window.addEventListener('storage', cb);
   return () => {

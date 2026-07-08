@@ -296,7 +296,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 0;
+  /* Espaço no topo/direita para o botão "×" de remover (que fica em top/right
+     negativos) não ser cortado pelo overflow do container. */
+  padding: 14px 16px 4px 0;
   scrollbar-width: thin;
   scrollbar-color: var(--color-ink-soft) transparent;
 }

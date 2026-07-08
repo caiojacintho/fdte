@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Copy, Plus, X } from 'lucide-react';
 import { DateField, TimeField } from './PickerFields';
-import { addTransmission } from '../transmissions/store';
+import { addTransmission, updateTransmission } from '../transmissions/store';
 
 // Base do link de acesso ao formulário (mock — o backend gerará o link real depois).
 const LINK_BASE = 'https://consulta.planehab.ba.gov.br/acesso';
@@ -29,7 +29,7 @@ function todayIso() {
 export function TransmissionButton() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<'form' | 'result'>('form');
+  const [step, setStep] = useState<'form' | 'result' | 'quantity' | 'groups'>('form');
   const [date, setDate] = useState(todayIso);
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
@@ -39,6 +39,8 @@ export function TransmissionButton() {
   const [url, setUrl] = useState('');
   const [createdId, setCreatedId] = useState('');
   const [copied, setCopied] = useState(false);
+  const [groups, setGroups] = useState<{ name: string; url: string }[]>([]);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
   function reset() {
     setStep('form');
@@ -51,6 +53,8 @@ export function TransmissionButton() {
     setUrl('');
     setCreatedId('');
     setCopied(false);
+    setGroups([]);
+    setCopiedIdx(null);
   }
 
   function close() {
@@ -96,6 +100,29 @@ export function TransmissionButton() {
     }
   }
 
+  // Gera N grupos, cada um com um link de acesso próprio.
+  function chooseQuantity(n: number) {
+    const list = Array.from({ length: n }, (_, i) => ({
+      name: `Grupo ${i + 1}`,
+      url: `${LINK_BASE}/${makeCode()}`,
+    }));
+    setGroups(list);
+    // Persiste os grupos na sessão para o painel poder exibi-los depois.
+    if (createdId) updateTransmission(createdId, { groups: list });
+    setCopiedIdx(null);
+    setStep('groups');
+  }
+
+  async function copyGroup(idx: number, groupUrl: string) {
+    try {
+      await navigator.clipboard.writeText(groupUrl);
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx((cur) => (cur === idx ? null : cur)), 2000);
+    } catch {
+      /* clipboard indisponível — o usuário pode copiar manualmente */
+    }
+  }
+
   return (
     <>
       <button
@@ -114,7 +141,7 @@ export function TransmissionButton() {
       {open && (
         <div className="modal-overlay" onClick={close}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            {step === 'form' ? (
+            {step === 'form' && (
               <>
                 <div className="modal-head">
                   <div>
@@ -174,7 +201,9 @@ export function TransmissionButton() {
                   </button>
                 </div>
               </>
-            ) : (
+            )}
+
+            {step === 'result' && (
               <>
                 <div className="modal-head">
                   <div>
@@ -206,11 +235,101 @@ export function TransmissionButton() {
                     </div>
                   </div>
 
-                  <button className="btn btn-block" type="button" style={{ padding: '14px 16px' }}>
+                  <button
+                    className="btn btn-block"
+                    type="button"
+                    style={{ padding: '14px 16px' }}
+                    onClick={() => setStep('quantity')}
+                  >
                     Iniciar Jogo do Bairro
                   </button>
+                </div>
+              </>
+            )}
 
-                  <button className="btn btn-secondary btn-block" type="button" onClick={goToSession} style={{ padding: '14px 16px', marginTop: -6 }}>
+            {step === 'quantity' && (
+              <>
+                <div className="modal-head">
+                  <div>
+                    <h2 style={{ fontSize: '1.15rem' }}>Jogo do Bairro</h2>
+                    <p style={{ color: 'var(--text-soft)', fontSize: '0.88rem', marginTop: 4 }}>
+                      Quantos formulários você gostaria de criar?
+                    </p>
+                  </div>
+                  <button className="modal-close" type="button" aria-label="Fechar" onClick={close}>
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    marginTop: 16,
+                  }}
+                >
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                    <button
+                      key={n}
+                      className="btn btn-secondary btn-block"
+                      type="button"
+                      onClick={() => chooseQuantity(n)}
+                      style={{ padding: '14px 0', fontSize: '1.15rem', fontWeight: 600 }}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {step === 'groups' && (
+              <>
+                <div className="modal-head">
+                  <div>
+                    <h2 style={{ fontSize: '1.15rem' }}>Links dos grupos</h2>
+                    <p style={{ color: 'var(--text-soft)', fontSize: '0.88rem', marginTop: 4 }}>
+                      {groups.length === 1
+                        ? '1 formulário criado. Compartilhe o link com o grupo.'
+                        : `${groups.length} formulários criados. Compartilhe cada link com o grupo correspondente.`}
+                    </p>
+                  </div>
+                  <button className="modal-close" type="button" aria-label="Fechar" onClick={close}>
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 16 }}>
+                  {groups.map((g, i) => (
+                    <div className="field" key={i}>
+                      <label>{g.name}</label>
+                      <div className="copy-field">
+                        <input
+                          className="input"
+                          readOnly
+                          value={g.url}
+                          onFocus={(e) => e.target.select()}
+                        />
+                        <button
+                          className="btn btn-secondary"
+                          type="button"
+                          onClick={() => copyGroup(i, g.url)}
+                          aria-label={copiedIdx === i ? 'Copiado' : 'Copiar link'}
+                          title={copiedIdx === i ? 'Copiado' : 'Copiar'}
+                        >
+                          {copiedIdx === i ? <Check size={16} /> : <Copy size={16} />}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    className="btn btn-secondary btn-block"
+                    type="button"
+                    onClick={goToSession}
+                    style={{ padding: '14px 16px' }}
+                  >
                     Ver sessão
                   </button>
                 </div>

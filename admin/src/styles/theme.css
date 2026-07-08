@@ -1011,6 +1011,13 @@ select.input,
   border: 1px solid var(--border);
 }
 
+.live-badge.upcoming {
+  padding: 6px 12px;
+  background: #fef9c3;
+  color: #ca8a04;
+  border: none;
+}
+
 .live-dot {
   width: 8px;
   height: 8px;

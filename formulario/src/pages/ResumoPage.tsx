@@ -30,6 +30,7 @@ export function ResumoPage() {
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [boardUrl, setBoardUrl] = useState<string | null>(null);
+  const [successImg, setSuccessImg] = useState<string | null>(null);
 
   if (loading) return <p style={{ padding: 24 }}>Carregando...</p>;
 
@@ -51,11 +52,24 @@ export function ResumoPage() {
     try {
       await complete();
       setShowSuccess(true);
+      // Gera a imagem do tabuleiro preenchido para exibir no pop-up de sucesso.
+      try {
+        const file = await buildImageFile(getBoardData());
+        setSuccessImg(URL.createObjectURL(file));
+      } catch {
+        /* sem a imagem o pop-up ainda funciona; o botão Compartilhar regenera */
+      }
     } catch {
       setError('Não foi possível enviar agora. Tente novamente.');
     } finally {
       setSending(false);
     }
+  }
+
+  function closeSuccess() {
+    if (successImg) URL.revokeObjectURL(successImg);
+    setSuccessImg(null);
+    setShowSuccess(false);
   }
 
   function getBoardData() {
@@ -267,17 +281,24 @@ export function ResumoPage() {
       {showSuccess && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <div style={{ fontSize: '2.8rem', lineHeight: 1 }} aria-hidden="true">
-              🎉
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-              <p className="modal-text" style={{ whiteSpace: 'normal' }}>
-                Formulário enviado com sucesso!
-              </p>
-              <p style={{ color: 'var(--color-ink-soft)', margin: 0 }}>
-                Obrigado por participar da Consulta Popular da Habitação.
-              </p>
-            </div>
+            <p className="modal-text" style={{ whiteSpace: 'normal' }}>
+              Formulário enviado com sucesso!
+            </p>
+            {successImg ? (
+              <img
+                src={successImg}
+                alt="Tabuleiro preenchido"
+                style={{
+                  width: '100%',
+                  maxHeight: '50vh',
+                  objectFit: 'contain',
+                  borderRadius: 12,
+                  border: '2px solid var(--color-ink)',
+                }}
+              />
+            ) : (
+              <p style={{ color: 'var(--color-ink-soft)', margin: 0 }}>Gerando o tabuleiro…</p>
+            )}
             <button
               className="btn"
               type="button"
@@ -292,7 +313,7 @@ export function ResumoPage() {
               type="button"
               style={{ marginTop: -12 }}
               disabled={sharing}
-              onClick={() => setShowSuccess(false)}
+              onClick={closeSuccess}
             >
               Concluir
             </button>
