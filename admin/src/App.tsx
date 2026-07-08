@@ -1,11 +1,13 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { GlobalTooltip } from './components/GlobalTooltip';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SubmissionDetailPage } from './pages/SubmissionDetailPage';
 import { AccountPage } from './pages/AccountPage';
 import { SuportePage } from './pages/SuportePage';
+import { TransmissionPage } from './pages/TransmissionPage';
 
 export default function App() {
   return (
@@ -45,8 +47,17 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/transmissoes/:id"
+            element={
+              <ProtectedRoute>
+                <TransmissionPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <GlobalTooltip />
       </BrowserRouter>
     </AuthProvider>
   );

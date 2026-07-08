@@ -117,19 +117,27 @@ export function DateField({ value, onChange }: { value: string; onChange: (v: st
 }
 
 // ---------- Horário ----------
-const HOURS = Array.from({ length: 24 }, (_, i) => pad(i));
-const MINUTES = Array.from({ length: 12 }, (_, i) => pad(i * 5));
+// Opções de horário em intervalos de 15 minutos (00:00, 00:15, … 23:45).
+const TIMES = Array.from({ length: 24 * 4 }, (_, i) => `${pad(Math.floor(i / 4))}:${pad((i % 4) * 15)}`);
 
-export function TimeField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function TimeField({
+  value,
+  onChange,
+  disabled = false,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useOutside(open, () => setOpen(false));
-  const [h, m] = value ? value.split(':') : ['', ''];
 
   return (
     <div className="picker" ref={ref}>
       <button
         type="button"
         className={`picker-trigger input${value ? '' : ' placeholder'}`}
+        disabled={disabled}
         onClick={() => setOpen((o) => !o)}
       >
         <span>{value || '--:--'}</span>
@@ -139,31 +147,18 @@ export function TimeField({ value, onChange }: { value: string; onChange: (v: st
       {open && (
         <div className="picker-pop time-pop">
           <div className="time-col">
-            <span className="time-col-label">Hora</span>
             <div className="time-list">
-              {HOURS.map((hh) => (
+              {TIMES.map((t) => (
                 <button
-                  key={hh}
+                  key={t}
                   type="button"
-                  className={`time-opt${hh === h ? ' selected' : ''}`}
-                  onClick={() => onChange(`${hh}:${m || '00'}`)}
+                  className={`time-opt time-opt-wide${t === value ? ' selected' : ''}`}
+                  onClick={() => {
+                    onChange(t);
+                    setOpen(false);
+                  }}
                 >
-                  {hh}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="time-col">
-            <span className="time-col-label">Min</span>
-            <div className="time-list">
-              {MINUTES.map((mm) => (
-                <button
-                  key={mm}
-                  type="button"
-                  className={`time-opt${mm === m ? ' selected' : ''}`}
-                  onClick={() => onChange(`${h || '00'}:${mm}`)}
-                >
-                  {mm}
+                  {t}
                 </button>
               ))}
             </div>

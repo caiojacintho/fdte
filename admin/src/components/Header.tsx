@@ -21,7 +21,7 @@ export function Header({ tools }: { tools?: ReactNode }) {
       }}
     >
       <BrandLogos />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         {tools}
         <TransmissionButton />
         <UserMenu />

@@ -35,7 +35,7 @@ export function UserMenu() {
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        <User size={18} />
+        <User size={15} />
       </button>
 
       {open && (

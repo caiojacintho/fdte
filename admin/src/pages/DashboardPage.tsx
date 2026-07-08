@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Building2, ChevronRight, MapPin, Send, Users } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, Users } from 'lucide-react';
 import { Header } from '../components/Header';
+import { TransmissionSidebar } from '../components/TransmissionSidebar';
+import { CitySelect } from '../components/CitySelect';
+import { ExportMenu } from '../components/ExportMenu';
 import { api, type SubmissionListItem } from '../api/client';
 
 function distinct(values: (string | null)[]): string[] {
@@ -11,6 +14,7 @@ function distinct(values: (string | null)[]): string[] {
 }
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState<SubmissionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,9 +41,10 @@ export function DashboardPage() {
 
   const stats = useMemo(
     () => ({
+      opened: filtered.length,
       sent: filtered.filter((r) => r.status === 'completed').length,
+      inProgress: filtered.filter((r) => r.status === 'in_progress').length,
       cities: distinct(filtered.map((r) => r.city)).length,
-      entities: distinct(filtered.map((r) => r.entity)).length,
     }),
     [filtered]
   );
@@ -49,48 +54,35 @@ export function DashboardPage() {
   return (
     <div>
       <Header
-        tools={
-          <select
-            className="input"
-            aria-label="Filtrar por cidade"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            style={{ minWidth: 200, borderRadius: 999, paddingLeft: 16 }}
-          >
-            <option value="">Todas as cidades</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        }
+        tools={<CitySelect value={city} cities={cities} onChange={setCity} />}
       />
 
-      <main style={{ maxWidth: 1180, margin: '0 auto', padding: '28px 24px 80px' }}>
+      <div className="app-body">
+        <TransmissionSidebar />
+        <main className="app-main" style={{ padding: '28px 24px 80px' }}>
+        {/* Título da página + exportar todos os dados */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap',
+            marginBottom: 20,
+          }}
+        >
+          <h1 className="session-title">Todas as sessões</h1>
+          <ExportMenu rows={rows} iconOnly />
+        </div>
+
         {/* Cards de estatísticas */}
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
-          <StatCard
-            icon={<Send size={20} />}
-            tint="var(--primary)"
-            tintSoft="var(--primary-soft)"
-            value={stats.sent}
-            label="Respostas enviadas"
-          />
-          <StatCard
-            icon={<MapPin size={20} />}
-            tint="var(--accent)"
-            tintSoft="var(--accent-soft)"
-            value={stats.cities}
-            label="Cidades"
-          />
-          <StatCard
-            icon={<Building2 size={20} />}
-            tint="var(--warning)"
-            tintSoft="var(--warning-soft)"
-            value={stats.entities}
-            label="Entidades"
-          />
+        <div className="session-row">
+          <div className="session-stats">
+            <StatCard value={stats.opened} label="Páginas abertas" />
+            <StatCard value={stats.sent} label="Respostas enviadas" />
+            <StatCard value={stats.inProgress} label="Em andamento" />
+            <StatCard value={stats.cities} label="Cidades" />
+          </div>
         </div>
 
         {/* Tabela */}
@@ -122,7 +114,11 @@ export function DashboardPage() {
                 />
               ) : (
                 filtered.map((s) => (
-                  <tr key={s.id}>
+                  <tr
+                    key={s.id}
+                    className="row-clickable"
+                    onClick={() => navigate(`/submissoes/${s.id}`)}
+                  >
                     <td>
                       <div style={{ fontWeight: 600 }}>{s.name}</div>
                     </td>
@@ -160,33 +156,17 @@ export function DashboardPage() {
             {hasFilters ? ` (de ${rows.length})` : ''}
           </p>
         )}
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
 
-function StatCard({
-  icon,
-  tint,
-  tintSoft,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  tint: string;
-  tintSoft: string;
-  value: number | string;
-  label: string;
-}) {
+function StatCard({ value, label }: { value: number | string; label: string }) {
   return (
-    <div className="stat-card">
-      <div className="stat-icon" style={{ background: tintSoft, color: tint }}>
-        {icon}
-      </div>
-      <div>
-        <div className="stat-value">{value}</div>
-        <div className="stat-label">{label}</div>
-      </div>
+    <div className="stat-card stat-card-inline">
+      <div className="stat-value">{value}</div>
+      <div className="stat-label">{label}</div>
     </div>
   );
 }

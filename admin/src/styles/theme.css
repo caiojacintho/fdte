@@ -1,6 +1,6 @@
 :root {
   /* Painel do Gestor — tema light/clean, neutro e claro (distinto da UI do jogo) */
-  --bg: #ffffff;
+  --bg: #fbfbfb;
   --surface: #ffffff;
   --surface-muted: #f9fafb;
   --border: #e6e9ef;
@@ -58,6 +58,16 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Fundo de mural (mesmo do onboarding do tabuleiro) */
+.mural-bg {
+  min-height: 100vh;
+  background-image: url('../assets/bg/mural.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 h1,
 h2,
 h3,
@@ -92,10 +102,10 @@ a {
   justify-content: center;
   gap: 8px;
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.9rem;
   line-height: 1;
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   border: 1px solid transparent;
   padding: 10px 16px;
   cursor: pointer;
@@ -122,6 +132,17 @@ a {
 
 .btn-secondary:hover {
   background: var(--surface-muted);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+.btn-danger:hover {
+  background: #c11f1f;
+  border-color: #c11f1f;
 }
 
 .btn-ghost {
@@ -180,20 +201,30 @@ a {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xs);
-  padding: 20px 22px;
+  padding: 13px 20px;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   flex: 1 1 200px;
 }
 
 .stat-icon {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
   flex-shrink: 0;
+  color: var(--text);
+}
+
+.stat-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .stat-value {
@@ -207,7 +238,6 @@ a {
 .stat-label {
   font-size: 0.82rem;
   color: var(--text-soft);
-  margin-top: 2px;
 }
 
 /* ---------- Forms ---------- */
@@ -372,6 +402,23 @@ select.input,
   cursor: pointer;
 }
 
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-row input {
+  width: 15px;
+  height: 15px;
+  accent-color: #bf6632;
+  cursor: pointer;
+}
+
 .login-forgot {
   background: none;
   border: none;
@@ -489,6 +536,11 @@ select.input,
   color: var(--text-soft);
 }
 
+/* Botão de copiar acompanha o raio do campo de link ao lado (não a pílula) */
+.copy-field .btn {
+  border-radius: var(--radius-sm);
+}
+
 /* ---------- Date / Time pickers ---------- */
 .picker {
   position: relative;
@@ -507,6 +559,12 @@ select.input,
 
 .picker-trigger.placeholder span {
   color: var(--text-faint);
+}
+
+.picker-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background: var(--surface-muted);
 }
 
 .picker-trigger svg {
@@ -639,6 +697,10 @@ select.input,
   color: var(--text);
 }
 
+.time-opt-wide {
+  width: 84px;
+}
+
 .time-opt:hover {
   background: var(--surface-muted);
 }
@@ -688,7 +750,16 @@ select.input,
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+}
+
+/* Tabela da sessão: mantém o card branco com stroke, mas cabeçalho branco,
+   sem caixa alta e com peso de fonte mais leve. */
+.table-wrap.table-open thead th {
+  background: var(--surface);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
 }
 
 .table thead th {
@@ -718,6 +789,345 @@ select.input,
   background: var(--surface-muted);
 }
 
+.table tbody tr.row-clickable {
+  cursor: pointer;
+}
+
+/* Botões do topo (Voltar / Ver tabuleiro) com a mesma UI dos cards abaixo */
+.detail-top-actions .btn {
+  background: #faf1e0;
+  border: 3px solid #3b2a20;
+  color: #3b2a20;
+}
+
+.detail-top-actions .btn:hover:not(:disabled) {
+  background: #f2e5cd;
+}
+
+/* Cards da resposta — mesma UI da tela de revisão do formulário (bege, arredondado) */
+.review-card {
+  background: #faf1e0;
+  border: 3px solid #3b2a20;
+  border-radius: 22px;
+  box-shadow: 0 6px 18px rgba(59, 42, 32, 0.18);
+  padding: 16px 20px;
+  margin-bottom: 14px;
+}
+
+.review-field {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.review-field-img {
+  height: 76px;
+  width: auto;
+  max-width: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.review-empty {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  border: 2px dashed #c9b48f;
+}
+
+.review-field-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-label {
+  font-size: 0.8rem;
+  color: #9a8268;
+}
+
+.review-name {
+  font-size: 1rem;
+  color: #3b2a20;
+}
+
+.review-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-section .review-label {
+  margin-bottom: 12px;
+}
+
+.review-empty-hint {
+  color: #9a8268;
+  font-size: 0.85rem;
+}
+
+/* Grade de imagens das cartas (detalhe da resposta), como na tela de revisão */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mini-card {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+}
+
+/* Visualização do tabuleiro preenchido */
+.board-preview-img {
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ---------- Página da sessão (transmissão ao vivo) ---------- */
+.session-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.session-title-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.session-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Tooltip do botão de exportar quando desabilitado (sessão em andamento) */
+.export-menu {
+  position: relative;
+}
+
+.export-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 80;
+  width: max-content;
+  max-width: 230px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(-2px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.export-menu:hover .export-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Tooltip global (substitui os tooltips nativos de qualquer botão com `title`) */
+.global-tooltip {
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: max-content;
+  max-width: 260px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+/* Botão de excluir: mesma altura dos demais botões e totalmente redondo */
+.session-actions .icon-btn {
+  width: 36px;
+  height: 36px;
+  align-self: center;
+}
+
+.session-title-row .live-badge {
+  margin-left: 12px;
+}
+
+.session-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.session-sub {
+  font-size: 1.05rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.session-desc {
+  margin-top: 8px;
+  max-width: 640px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 6px 0;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--success);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.live-badge.ended {
+  padding: 6px 12px;
+  background: var(--surface-muted);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--success);
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
+  animation: live-pulse 1.6s ease-out infinite;
+}
+
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(22, 163, 74, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+  }
+}
+
+.session-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  margin: 24px 0 12px;
+}
+
+.session-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Segmented control (alterna etapas) */
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.segmented-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.segmented-btn:hover {
+  color: var(--text);
+}
+
+/* Selecionado = botão dentro de um card; não selecionado = fora do card */
+.segmented-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Cartões da sessão: card completo (bg/stroke/sombra), valor e rótulo na mesma
+   linha, com o rótulo alinhado à base do número. */
+.stat-card-inline {
+  align-items: baseline;
+  gap: 8px;
+  padding: 16px 20px;
+}
+
+.stat-card-inline .stat-label {
+  font-size: 0.78rem;
+}
+
+.session-stats .stat-card {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.session-link {
+  flex: 0 1 300px;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Em telas estreitas, permite quebrar para não estourar horizontalmente */
+@media (max-width: 720px) {
+  .session-row,
+  .session-stats {
+    flex-wrap: wrap;
+  }
+}
+
+.link-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 12px 16px;
+}
+
+.link-card > label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
 /* ---------- Dropdown menu ---------- */
 .menu {
   position: absolute;
@@ -732,12 +1142,63 @@ select.input,
   z-index: 50;
 }
 
-.menu-section-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+/* ---------- Filtro de cidade (dropdown customizado) ---------- */
+.city-select {
+  position: relative;
+}
+
+.city-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 200px;
+  padding: 10px 14px 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
   color: var(--text-faint);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.city-select-trigger:hover {
+  border-color: var(--text-faint);
+}
+
+.city-select-trigger svg {
+  color: var(--text-faint);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.city-select[data-open='true'] .city-select-trigger svg {
+  transform: rotate(180deg);
+}
+
+.city-select-menu {
+  left: 0;
+  right: auto;
+  min-width: 100%;
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.city-select-menu .menu-item.active {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.city-select-menu .menu-item svg {
+  color: var(--primary);
+}
+
+.menu-section-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-soft);
   padding: 8px 8px 4px;
 }
 
@@ -779,4 +1240,127 @@ select.input,
 
 .menu-item.danger svg {
   color: var(--danger);
+}
+
+/* ---------- Layout com barra lateral ---------- */
+.app-body {
+  display: flex;
+  align-items: flex-start;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar {
+  flex-shrink: 0;
+  width: 260px;
+  align-self: stretch;
+  position: sticky;
+  top: 77px;
+  height: calc(100vh - 77px);
+  overflow-y: auto;
+  padding: 20px 14px;
+  background: var(--bg);
+}
+
+.sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--text-soft);
+  padding: 0 8px 12px;
+}
+
+.sidebar-title svg {
+  color: var(--primary);
+}
+
+.sidebar-empty {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  line-height: 1.5;
+}
+
+.sidebar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-faint);
+  background: transparent;
+  transition: color 0.15s ease;
+}
+
+.sidebar-all::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.sidebar-all:hover {
+  color: var(--text-soft);
+}
+
+.sidebar-all.active {
+  color: var(--text);
+}
+
+.sidebar-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--text-faint);
+  background: transparent;
+  transition: color 0.15s ease;
+}
+
+.sidebar-item::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.sidebar-item:hover {
+  color: var(--text-soft);
+}
+
+.sidebar-item.active {
+  color: var(--text);
+}
+
+.sidebar-item-date {
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.sidebar-item-time {
+  font-size: 0.8rem;
+  font-weight: 500;
 }

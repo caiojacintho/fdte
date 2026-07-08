@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, Copy, Plus, X } from 'lucide-react';
 import { DateField, TimeField } from './PickerFields';
+import { addTransmission } from '../transmissions/store';
 
 // Base do link de acesso ao formulário (mock — o backend gerará o link real depois).
 const LINK_BASE = 'https://consulta.planehab.ba.gov.br/acesso';
@@ -17,23 +19,37 @@ function formatDate(iso: string) {
   return `${d}/${m}/${y}`;
 }
 
+// Data de hoje no formato ISO (yyyy-mm-dd), usada para pré-preencher o campo.
+function todayIso() {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
 export function TransmissionButton() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<'form' | 'result'>('form');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(todayIso);
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
+  const [noEnd, setNoEnd] = useState(false);
+  const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [url, setUrl] = useState('');
+  const [createdId, setCreatedId] = useState('');
   const [copied, setCopied] = useState(false);
 
   function reset() {
     setStep('form');
-    setDate('');
+    setDate(todayIso());
     setStart('');
     setEnd('');
+    setNoEnd(false);
+    setDescription('');
     setError(null);
     setUrl('');
+    setCreatedId('');
     setCopied(false);
   }
 
@@ -44,16 +60,30 @@ export function TransmissionButton() {
 
   function handleStart() {
     setError(null);
-    if (!date || !start || !end) {
-      setError('Preencha a data e os horários inicial e final.');
+    if (!date || !start || (!noEnd && !end)) {
+      setError(
+        noEnd
+          ? 'Preencha a data e o horário inicial.'
+          : 'Preencha a data e os horários inicial e final.'
+      );
       return;
     }
-    if (end <= start) {
+    if (!noEnd && end <= start) {
       setError('O horário final deve ser depois do inicial.');
       return;
     }
-    setUrl(`${LINK_BASE}/${makeCode()}`);
+    const finalEnd = noEnd ? '' : end;
+    const link = `${LINK_BASE}/${makeCode()}`;
+    setUrl(link);
+    const item = addTransmission({ date, start, end: finalEnd, description: description.trim(), url: link });
+    setCreatedId(item.id);
     setStep('result');
+  }
+
+  // Abre a página da sessão recém-criada (fica selecionada na barra lateral).
+  function goToSession() {
+    if (createdId) navigate(`/transmissoes/${createdId}`);
+    close();
   }
 
   async function copy() {
@@ -71,11 +101,14 @@ export function TransmissionButton() {
       <button
         className="btn btn-secondary icon-btn"
         type="button"
-        aria-label="Nova transmissão"
-        title="Nova transmissão"
-        onClick={() => setOpen(true)}
+        aria-label="Nova sessão"
+        title="Nova sessão"
+        onClick={() => {
+          setDate(todayIso());
+          setOpen(true);
+        }}
       >
-        <Plus size={20} />
+        <Plus size={16} />
       </button>
 
       {open && (
@@ -85,7 +118,7 @@ export function TransmissionButton() {
               <>
                 <div className="modal-head">
                   <div>
-                    <h2 style={{ fontSize: '1.15rem' }}>Nova transmissão</h2>
+                    <h2 style={{ fontSize: '1.15rem' }}>Nova sessão</h2>
                     <p style={{ color: 'var(--text-soft)', fontSize: '0.88rem', marginTop: 4 }}>
                       Defina quando o link de acesso ao formulário ficará aberto.
                     </p>
@@ -108,14 +141,36 @@ export function TransmissionButton() {
                     </div>
                     <div className="field" style={{ flex: 1 }}>
                       <label>Horário final</label>
-                      <TimeField value={end} onChange={setEnd} />
+                      <TimeField value={noEnd ? '' : end} onChange={setEnd} disabled={noEnd} />
                     </div>
+                  </div>
+
+                  <label className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      checked={noEnd}
+                      onChange={(e) => setNoEnd(e.target.checked)}
+                    />
+                    <span>Não definir horário final</span>
+                  </label>
+
+                  <div className="field">
+                    <label htmlFor="t-desc">Descrição</label>
+                    <textarea
+                      id="t-desc"
+                      className="input"
+                      rows={3}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Alguma observação sobre esta sessão"
+                      style={{ resize: 'vertical', minHeight: 72 }}
+                    />
                   </div>
 
                   {error && <span className="error-text">{error}</span>}
 
                   <button className="btn btn-block" type="button" onClick={handleStart} style={{ marginTop: 4, padding: '14px 16px' }}>
-                    Iniciar transmissão
+                    Iniciar sessão
                   </button>
                 </div>
               </>
@@ -123,9 +178,10 @@ export function TransmissionButton() {
               <>
                 <div className="modal-head">
                   <div>
-                    <h2 style={{ fontSize: '1.15rem' }}>Transmissão criada</h2>
+                    <h2 style={{ fontSize: '1.15rem' }}>Sessão em andamento</h2>
                     <p style={{ color: 'var(--text-soft)', fontSize: '0.88rem', marginTop: 4 }}>
-                      O link ficará aberto em {formatDate(date)}, das {start} às {end}.
+                      O link ficará aberto em {formatDate(date)},{' '}
+                      {end ? `das ${start} às ${end}` : `a partir das ${start}`}.
                     </p>
                   </div>
                   <button className="modal-close" type="button" aria-label="Fechar" onClick={close}>
@@ -154,8 +210,8 @@ export function TransmissionButton() {
                     Iniciar Jogo do Bairro
                   </button>
 
-                  <button className="btn btn-secondary btn-block" type="button" onClick={close} style={{ padding: '14px 16px', marginTop: -6 }}>
-                    Concluir
+                  <button className="btn btn-secondary btn-block" type="button" onClick={goToSession} style={{ padding: '14px 16px', marginTop: -6 }}>
+                    Ver sessão
                   </button>
                 </div>
               </>

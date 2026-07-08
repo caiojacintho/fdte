@@ -3,27 +3,17 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Header } from '../components/Header';
 import { api, type PlacementDTO, type SubmissionDetail } from '../api/client';
-import { CATEGORY_COLORS, getCard, getPainelCard, type CardDef } from '../data/cards';
-
-function CardChip({ card }: { card?: CardDef }) {
-  if (!card) {
-    return <span style={{ color: 'var(--text-faint)', fontSize: '0.85rem' }}>— vazio —</span>;
-  }
-  const color = CATEGORY_COLORS[card.category];
-  return (
-    <span
-      className="badge"
-      style={{ background: color + '18', color, borderColor: 'transparent', fontSize: '0.8rem' }}
-    >
-      {card.label}
-    </span>
-  );
-}
+import { getCard, type CardDef } from '../data/cards';
+import { getCardImage } from '../data/cardImages';
+import { buildBoardUrl } from '../lib/board';
 
 export function SubmissionDetailPage() {
   const { id } = useParams();
   const [submission, setSubmission] = useState<SubmissionDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [boardUrl, setBoardUrl] = useState<string | null>(null);
+  const [boardLoading, setBoardLoading] = useState(false);
+  const [boardError, setBoardError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -40,35 +30,70 @@ export function SubmissionDetailPage() {
   const comoEHoje = getCard(findTabuleiro('como_e_hoje'));
   const comoMudar = getCard(findTabuleiro('como_mudar'));
 
-  const casaCards = placements
+  const casaPlacements = placements
     .filter((p) => p.board === 'tabuleiro' && p.slot_key.startsWith('precisa_'))
+    .sort((a, b) => a.slot_key.localeCompare(b.slot_key, undefined, { numeric: true }));
+
+  const casaCards = casaPlacements
     .map((p) => getCard(p.card_id))
     .filter((c): c is CardDef => Boolean(c));
 
-  const bairroCards = placements
-    .filter((p) => p.board === 'painel')
-    .map((p) => getPainelCard(p.card_id))
-    .filter((c): c is CardDef => Boolean(c));
+  // Gera a imagem do tabuleiro com as cartas do participante, na mesma ordem.
+  async function handleViewBoard() {
+    if (!submission) return;
+    setBoardError(null);
+    setBoardLoading(true);
+    try {
+      const url = await buildBoardUrl({
+        name: submission.name,
+        city: submission.city,
+        entity: submission.entity,
+        comoEHoje: getCardImage(findTabuleiro('como_e_hoje')),
+        comoMudar: getCardImage(findTabuleiro('como_mudar')),
+        precisa: casaPlacements
+          .map((p) => getCardImage(p.card_id))
+          .filter((img): img is string => Boolean(img)),
+      });
+      setBoardUrl(url);
+    } catch {
+      setBoardError('Não foi possível gerar o tabuleiro. Tente novamente.');
+    } finally {
+      setBoardLoading(false);
+    }
+  }
+
+  function closeBoard() {
+    if (boardUrl) URL.revokeObjectURL(boardUrl);
+    setBoardUrl(null);
+  }
 
   return (
-    <div>
+    <div className="mural-bg">
       <Header />
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '28px 24px 80px' }}>
-        <Link
-          to="/"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            color: 'var(--text-soft)',
-            fontWeight: 600,
-            fontSize: '0.9rem',
-            textDecoration: 'none',
-          }}
+        <div
+          className="detail-top-actions"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
         >
-          <ArrowLeft size={16} />
-          Voltar
-        </Link>
+          <Link to="/" className="btn btn-secondary icon-btn" aria-label="Voltar" title="Voltar">
+            <ArrowLeft size={16} />
+          </Link>
+          {submission && (
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={handleViewBoard}
+              disabled={boardLoading}
+            >
+              {boardLoading ? 'Gerando tabuleiro…' : 'Ver tabuleiro'}
+            </button>
+          )}
+        </div>
+        {boardError && (
+          <p className="error-text" style={{ marginTop: 8 }}>
+            {boardError}
+          </p>
+        )}
 
         {loading ? (
           <p style={{ marginTop: 24, color: 'var(--text-soft)' }}>Carregando…</p>
@@ -76,7 +101,7 @@ export function SubmissionDetailPage() {
           <p style={{ marginTop: 24, color: 'var(--text-soft)' }}>Resposta não encontrada.</p>
         ) : (
           <>
-            <div className="card" style={{ padding: 22, margin: '18px 0 24px' }}>
+            <div className="review-card" style={{ padding: 22, margin: '18px 0 14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                 <div>
                   <h1 style={{ fontSize: '1.3rem' }}>{submission.name}</h1>
@@ -93,91 +118,77 @@ export function SubmissionDetailPage() {
               </div>
             </div>
 
-            {/* Etapa 1 — Como é hoje */}
-            <FieldCard label="1. Como é hoje">
-              <CardChip card={comoEHoje} />
-            </FieldCard>
-
-            {/* Etapa 2 — Como mudar */}
-            <FieldCard label="2. Como mudar">
-              <CardChip card={comoMudar} />
-            </FieldCard>
-
-            {/* Etapa 3 — O que minha casa precisa */}
-            <SectionCard label="3. O que minha casa precisa" count={casaCards.length}>
-              {casaCards.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {casaCards.map((c, i) => (
-                    <CardChip key={`${c.id}-${i}`} card={c} />
-                  ))}
-                </div>
-              ) : (
-                <EmptyHint />
-              )}
-            </SectionCard>
-
-            {/* Etapa 4 — O que o meu bairro precisa */}
-            <SectionCard label="4. O que o meu bairro precisa" count={bairroCards.length}>
-              {bairroCards.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {bairroCards.map((c, i) => (
-                    <CardChip key={`${c.id}-${i}`} card={c} />
-                  ))}
-                </div>
-              ) : (
-                <EmptyHint />
-              )}
-            </SectionCard>
+            {/* Etapas — mesma UI dos cards da revisão do formulário */}
+            <ReviewFieldCard label="Como é hoje" card={comoEHoje} />
+            <ReviewFieldCard label="Como mudar" card={comoMudar} />
+            <ReviewSectionCard label="O que minha casa precisa" cards={casaCards} />
           </>
         )}
       </main>
+
+      {/* Visualização do tabuleiro preenchido pelo participante (mesma imagem
+          gerada no formulário ao concluir o envio). */}
+      {boardUrl && (
+        <div className="modal-overlay" onClick={closeBoard}>
+          <img
+            src={boardUrl}
+            alt="Tabuleiro preenchido"
+            className="board-preview-img"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            className="btn"
+            type="button"
+            onClick={closeBoard}
+            style={{ position: 'fixed', top: 16, right: 16 }}
+          >
+            Fechar
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function FieldCard({ label, children }: { label: string; children: React.ReactNode }) {
+// Card de etapa única (1 e 2): imagem da carta + rótulo pequeno + nome.
+function ReviewFieldCard({ label, card }: { label: string; card?: CardDef }) {
+  const img = card ? getCardImage(card.id) : null;
   return (
-    <div className="card" style={{ padding: '14px 18px', marginBottom: 14 }}>
-      <div style={{ fontSize: '0.78rem', color: 'var(--text-faint)', fontWeight: 700, marginBottom: 8 }}>
-        {label}
+    <div className="review-card review-field">
+      {img ? (
+        <img src={img} alt={card!.label} className="review-field-img" />
+      ) : (
+        <div className="review-field-img review-empty" />
+      )}
+      <div className="review-field-text">
+        <span className="review-label">{label}</span>
+        <strong className="review-name">{card?.label ?? '—'}</strong>
       </div>
-      {children}
     </div>
   );
 }
 
-function SectionCard({
-  label,
-  count,
-  children,
-}: {
-  label: string;
-  count: number;
-  children: React.ReactNode;
-}) {
+// Card da etapa 3: rótulo + grade com as imagens das cartas.
+function ReviewSectionCard({ label, cards }: { label: string; cards: CardDef[] }) {
   return (
-    <div className="card" style={{ padding: '14px 18px', marginBottom: 14 }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          fontSize: '0.78rem',
-          color: 'var(--text-faint)',
-          fontWeight: 700,
-          marginBottom: 12,
-        }}
-      >
-        {label}
-        <span className="badge" style={{ fontSize: '0.7rem' }}>
-          {count} {count === 1 ? 'carta' : 'cartas'}
-        </span>
-      </div>
-      {children}
+    <div className="review-card review-section">
+      <span className="review-label">{label}</span>
+      {cards.length > 0 ? (
+        <div className="card-grid">
+          {cards.map((c, i) => {
+            const img = getCardImage(c.id);
+            return img ? (
+              <img key={`${c.id}-${i}`} src={img} alt={c.label} title={c.label} className="mini-card" />
+            ) : (
+              <span key={`${c.id}-${i}`} className="review-name" style={{ fontSize: '0.85rem' }}>
+                {c.label}
+              </span>
+            );
+          })}
+        </div>
+      ) : (
+        <span className="review-empty-hint">Nenhuma carta escolhida.</span>
+      )}
     </div>
   );
-}
-
-function EmptyHint() {
-  return <span style={{ color: 'var(--text-faint)', fontSize: '0.85rem' }}>Nenhuma carta escolhida.</span>;
 }
