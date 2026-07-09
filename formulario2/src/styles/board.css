@@ -358,11 +358,8 @@ body {
   cursor: default;
 }
 
-.board-card-question.is-sent {
-  background: linear-gradient(135deg, #2f5d34, var(--color-ink));
-  border-color: var(--color-success);
-}
-
+/* Depois de enviar, o card mantém o fundo marrom e o stroke padrão;
+   só a badge fica verde para sinalizar que o link foi encerrado. */
 .board-card-question.is-sent .step-badge {
   background: var(--color-success);
   color: white;

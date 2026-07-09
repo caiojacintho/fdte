@@ -216,28 +216,43 @@ export function TransmissionPage() {
                     )}
                   </div>
                   {session.description && <p className="session-desc">{session.description}</p>}
-                </div>
 
-                {/* Alterna entre as duas etapas (ambas exibem uma tabela) */}
-                <div className="segmented" role="tablist">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={tab === 'etapa1'}
-                    className={`segmented-btn${tab === 'etapa1' ? ' active' : ''}`}
-                    onClick={() => setTab('etapa1')}
-                  >
-                    Etapa 1
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={tab === 'etapa2'}
-                    className={`segmented-btn${tab === 'etapa2' ? ' active' : ''}`}
-                    onClick={() => setTab('etapa2')}
-                  >
-                    Etapa 2
-                  </button>
+                  {/* Alterna entre as duas etapas — abaixo do título, alinhado à esquerda.
+                      O botão "Jogo do bairro" acompanha as abas e só aparece na Etapa 2. */}
+                  <div className="etapa-row">
+                    <div className="segmented" role="tablist">
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={tab === 'etapa1'}
+                        className={`segmented-btn${tab === 'etapa1' ? ' active' : ''}`}
+                        onClick={() => setTab('etapa1')}
+                      >
+                        Etapa 1
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={tab === 'etapa2'}
+                        className={`segmented-btn${tab === 'etapa2' ? ' active' : ''}`}
+                        onClick={() => setTab('etapa2')}
+                      >
+                        Etapa 2
+                      </button>
+                    </div>
+                    {tab === 'etapa2' && (
+                      <button
+                        className="btn btn-secondary btn-inline"
+                        type="button"
+                        onClick={() => {
+                          setCopiedGroupIdx(null);
+                          setShowGroups(true);
+                        }}
+                      >
+                        Jogo do bairro
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="session-actions">
@@ -262,16 +277,6 @@ export function TransmissionPage() {
                     </button>
                   )}
                   <ExportMenu rows={rows} iconOnly disabled={isSessionLive(session)} />
-                  <button
-                    className="btn btn-secondary"
-                    type="button"
-                    onClick={() => {
-                      setCopiedGroupIdx(null);
-                      setShowGroups(true);
-                    }}
-                  >
-                    Jogo do bairro
-                  </button>
                   {isSessionLive(session) && (
                     <button className="btn" type="button" onClick={endSession}>
                       Encerrar sessão

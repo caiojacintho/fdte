@@ -889,10 +889,24 @@ select.input,
 /* ---------- Página da sessão (transmissão ao vivo) ---------- */
 .session-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
+}
+
+/* As abas Etapa 1 / Etapa 2 ficam abaixo do título, alinhadas à esquerda.
+   O botão "Jogo do bairro" acompanha as abas na mesma linha. */
+.etapa-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.etapa-row .btn-inline {
+  padding: 7px 18px;
+  font-size: 0.85rem;
 }
 
 .session-title-row {
