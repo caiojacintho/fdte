@@ -11,7 +11,8 @@ import {
   updateTransmission,
   type Transmission,
 } from '../transmissions/store';
-import { api, type SubmissionListItem } from '../api/client';
+import { api, type SubmissionListItem, type BairroSubmissionItem } from '../api/client';
+import { bairroCardLabel, codeFromUrl } from '../data/bairroCards';
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -74,6 +75,8 @@ export function TransmissionPage() {
 
   const [session, setSession] = useState<Transmission | undefined>(() => getTransmission(id));
   const [rows, setRows] = useState<SubmissionListItem[]>([]);
+  const [bairroRows, setBairroRows] = useState<BairroSubmissionItem[]>([]);
+  const [viewGroup, setViewGroup] = useState<{ name: string; sub: BairroSubmissionItem } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -99,9 +102,13 @@ export function TransmissionPage() {
 
     async function tick() {
       try {
-        const { submissions } = await api.listSubmissions();
+        const [subs, bairro] = await Promise.all([
+          api.listSubmissions(),
+          api.listBairroSubmissions().catch(() => ({ submissions: [] as BairroSubmissionItem[] })),
+        ]);
         if (!active) return;
-        setRows(submissions);
+        setRows(subs.submissions);
+        setBairroRows(bairro.submissions);
         setError(null);
       } catch (e) {
         if (active) setError(e instanceof Error ? e.message : 'Erro ao carregar as respostas.');
@@ -131,6 +138,13 @@ export function TransmissionPage() {
   );
   const inProgress = useMemo(() => rows.filter((r) => r.status === 'in_progress').length, [rows]);
   const citiesCount = useMemo(() => distinct(sent.map((r) => r.city)), [sent]);
+
+  // Casa cada grupo (pelo código do link) com a resposta enviada no Jogo do Bairro.
+  const bairroByCode = useMemo(() => {
+    const m = new Map<string, BairroSubmissionItem>();
+    bairroRows.forEach((b) => m.set(b.code, b));
+    return m;
+  }, [bairroRows]);
 
   // Encerra a sessão: define o horário final como o momento atual, saindo do
   // "ao vivo". No back-end (futuro) é aqui que o link deixaria de funcionar.
@@ -284,18 +298,45 @@ export function TransmissionPage() {
                       <tr>
                         <th>Grupo</th>
                         <th>Link de acesso</th>
+                        <th>Resposta</th>
+                        <th style={{ width: 40 }} />
                       </tr>
                     </thead>
                     <tbody>
                       {session.groups && session.groups.length > 0 ? (
-                        session.groups.slice(0, 6).map((g, i) => (
-                          <tr key={i}>
-                            <td>
-                              <div style={{ fontWeight: 600 }}>{g.name}</div>
-                            </td>
-                            <td style={{ color: 'var(--text-soft)' }}>{g.url}</td>
-                          </tr>
-                        ))
+                        session.groups.slice(0, 6).map((g, i) => {
+                          const sub = bairroByCode.get(codeFromUrl(g.url));
+                          const done = sub?.status === 'completed';
+                          const count = sub ? Object.keys(sub.placements).length : 0;
+                          return (
+                            <tr
+                              key={i}
+                              className={done ? 'row-clickable' : ''}
+                              onClick={done && sub ? () => setViewGroup({ name: g.name, sub }) : undefined}
+                            >
+                              <td>
+                                <div style={{ fontWeight: 600 }}>{g.name}</div>
+                              </td>
+                              <td style={{ color: 'var(--text-soft)' }}>{g.url}</td>
+                              <td>
+                                {done ? (
+                                  <span className="live-badge ended" style={{ background: 'var(--ok-soft, #e3f3e4)', color: '#2f7a34' }}>
+                                    Enviada · {count} {count === 1 ? 'carta' : 'cartas'}
+                                  </span>
+                                ) : (
+                                  <span style={{ color: 'var(--text-faint)' }}>Aguardando</span>
+                                )}
+                              </td>
+                              <td>
+                                {done && (
+                                  <span style={{ display: 'inline-flex', color: 'var(--text-faint)' }}>
+                                    <ChevronRight size={18} />
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <EmptyRow
                           icon={<Users size={28} />}
@@ -419,6 +460,47 @@ export function TransmissionPage() {
                 Nenhum formulário do Jogo do Bairro foi criado para esta sessão.
               </p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Respostas enviadas por um grupo no Jogo do Bairro */}
+      {viewGroup && (
+        <div className="modal-overlay" onClick={() => setViewGroup(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div>
+                <h2 style={{ fontSize: '1.15rem' }}>{viewGroup.name} — respostas</h2>
+                <p style={{ color: 'var(--text-soft)', fontSize: '0.85rem', marginTop: 4 }}>
+                  {viewGroup.sub.completed_at
+                    ? `Enviadas em ${new Date(viewGroup.sub.completed_at).toLocaleString('pt-BR')}`
+                    : ''}
+                </p>
+              </div>
+              <button className="modal-close" type="button" aria-label="Fechar" onClick={() => setViewGroup(null)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {(() => {
+              const entries = Object.entries(viewGroup.sub.placements).sort((a, b) =>
+                a[0].localeCompare(b[0], undefined, { numeric: true })
+              );
+              if (entries.length === 0) {
+                return (
+                  <p style={{ color: 'var(--text-soft)', fontSize: '0.9rem', marginTop: 12 }}>
+                    Este grupo enviou o painel sem cartas.
+                  </p>
+                );
+              }
+              return (
+                <ol className="bairro-answer-list">
+                  {entries.map(([slot, cardId]) => (
+                    <li key={slot}>{bairroCardLabel(cardId)}</li>
+                  ))}
+                </ol>
+              );
+            })()}
           </div>
         </div>
       )}

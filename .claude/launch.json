@@ -21,6 +21,13 @@
       "runtimeArgs": ["--prefix", "admin", "run", "dev"],
       "port": 5174,
       "autoPort": true
+    },
+    {
+      "name": "formulario2",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "formulario2", "run", "dev"],
+      "port": 5176,
+      "autoPort": true
     }
   ]
 }

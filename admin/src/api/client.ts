@@ -63,6 +63,17 @@ export interface SubmissionDetail extends SubmissionListItem {
   placements: PlacementDTO[];
 }
 
+export interface BairroSubmissionItem {
+  code: string;
+  group_name: string;
+  board: number;
+  status: 'in_progress' | 'completed';
+  placements: Record<string, string>;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}
+
 export interface CardCount {
   board: string;
   card_id: string;
@@ -104,4 +115,7 @@ export const api = {
   getSubmission: (id: number) => request<{ submission: SubmissionDetail }>(`/api/admin/submissions/${id}`),
 
   getStats: () => request<StatsDTO>('/api/admin/stats'),
+
+  listBairroSubmissions: () =>
+    request<{ submissions: BairroSubmissionItem[] }>('/api/admin/bairro'),
 };

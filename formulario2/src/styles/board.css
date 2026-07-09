@@ -1,0 +1,515 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  height: 100%;
+}
+
+/* ============ Página ============ */
+.bairro-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+/* ============ Header (igual ao da Etapa 1: transparente, logos à esquerda, FDTE à direita) ============ */
+.bairro-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 28px;
+  background: transparent;
+}
+
+.bairro-header-logos {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.bairro-header img {
+  display: block;
+  width: auto;
+}
+
+.bairro-header-fdte {
+  height: 28px;
+}
+
+.bairro-header-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sent-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--color-success);
+  color: white;
+}
+
+/* ============ Conteúdo: coluna do tabuleiro + bandeja ============ */
+.bairro-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 20px;
+  padding: 8px 28px 22px;
+}
+
+.board-col {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Card da pergunta: mesmo visual da Etapa 1 (fundo escuro, texto bege claro). */
+.board-card {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.board-card-question {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.question-main {
+  min-width: 0;
+}
+
+.board-card-question h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  line-height: 1.15;
+  color: var(--color-paper);
+}
+
+.question-actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.btn-sm {
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.step-badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  margin-bottom: 10px;
+}
+
+.board-area {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Caixa com a proporção exata do tabuleiro: a imagem a preenche por inteiro,
+   então as coordenadas em % dos slots batem com os hexágonos da arte. */
+.board-wrap {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 2380 / 1684;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  line-height: 0;
+}
+
+.board-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 3px solid var(--color-ink);
+}
+
+/* ============ Hex slots sobre o tabuleiro ============ */
+.hex-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: default;
+}
+
+/* Realce ao passar uma carta por cima de um espaço vazio. */
+.hex-highlight {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  outline: 3px solid var(--color-primary);
+  outline-offset: -3px;
+  animation: hexPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes hexPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.hex-card {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+/* A carta é um pouco maior que o hexágono do tabuleiro para cobri-lo por inteiro. */
+.hex-card img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 128%;
+  height: 128%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.28));
+  pointer-events: none;
+}
+
+.hex-remove {
+  position: absolute;
+  top: 2%;
+  right: 8%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: white;
+  border: 2px solid white;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  z-index: 3;
+}
+
+.hex-card:hover .hex-remove {
+  opacity: 1;
+}
+
+/* ============ Bandeja de cartas ============ */
+.tray-area {
+  flex: 0 0 380px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px 6px 16px 18px;
+  box-shadow: var(--shadow-card);
+}
+
+.tray-heading {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+  color: var(--color-ink);
+}
+
+.tray {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-soft) transparent;
+}
+
+.tray::-webkit-scrollbar {
+  width: 10px;
+}
+.tray::-webkit-scrollbar-thumb {
+  background: var(--color-ink-soft);
+  border-radius: 999px;
+}
+
+.tray-group-title {
+  margin: 0 0 8px;
+  font-size: 0.74rem;
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  border-bottom: 2px solid var(--color-ink-faint);
+  padding-bottom: 4px;
+}
+
+.tray-group-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.tray-card {
+  position: relative;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 10px;
+  transition: transform 0.1s ease;
+}
+
+.tray-card:hover {
+  transform: translateY(-2px) scale(1.03);
+  z-index: 2;
+}
+
+.tray-card:active {
+  cursor: grabbing;
+}
+
+.tray-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.tray-card.dragging {
+  opacity: 0.3;
+}
+
+/* Cartas já colocadas no painel aparecem apagadas na bandeja. */
+.tray-card.used {
+  opacity: 0.28;
+  pointer-events: none;
+  cursor: default;
+  filter: grayscale(0.6);
+}
+
+.drag-preview {
+  width: 150px;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.3));
+}
+
+.drag-preview img {
+  width: 100%;
+  height: auto;
+}
+
+/* ============ Estado enviado / link encerrado ============ */
+.hex-slot.locked .hex-card {
+  cursor: default;
+}
+
+.board-card-question.is-sent {
+  background: linear-gradient(135deg, #2f5d34, var(--color-ink));
+  border-color: var(--color-success);
+}
+
+.board-card-question.is-sent .step-badge {
+  background: var(--color-success);
+  color: white;
+}
+
+.tray-locked {
+  padding: 4px;
+}
+
+.tray-locked p {
+  margin-top: 10px;
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* ============ Pop-ups "Ver tabuleiro" / "Ver cartas" ============ */
+.viewer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.viewer-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 210;
+  transition: background 0.12s ease;
+}
+
+.viewer-close:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* --- Ver tabuleiro: painel no tamanho máximo da tela --- */
+.viewer-board {
+  position: relative;
+  aspect-ratio: 2380 / 1684;
+  max-width: 96vw;
+  max-height: 90vh;
+  height: 90vh;
+}
+
+.viewer-board-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  border-radius: var(--radius-md);
+}
+
+.viewer-hex {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  aspect-ratio: 1.1547;
+}
+
+.viewer-hex img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 128%;
+  height: 128%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+}
+
+/* --- Ver cartas: todas as 20 cartas, sem scroll e sem categorias --- */
+.viewer-cards {
+  width: min(78vw, 1080px);
+  height: 88vh;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.viewer-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+}
+
+.viewer-card img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+}
+
+/* ============ Guarda de desktop ============ */
+.desktop-only-guard {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .desktop-only-guard {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--color-surface);
+  }
+  .app-shell {
+    display: none;
+  }
+  .desktop-only-card {
+    max-width: 420px;
+    text-align: center;
+    background: var(--color-paper);
+    border: 3px solid var(--color-ink);
+    border-radius: var(--radius-lg);
+    padding: 32px 26px;
+    box-shadow: var(--shadow-card);
+  }
+  .desktop-only-card h2 {
+    margin: 0 0 10px;
+    color: var(--color-ink);
+  }
+  .desktop-only-card p {
+    margin: 0;
+    color: var(--color-ink-soft);
+    line-height: 1.4;
+  }
+}

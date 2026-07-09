@@ -39,6 +39,23 @@ const PLACEMENTS_DDL = `
   );
 `;
 
+// "Jogo do Bairro" (Etapa 2): cada grupo tem um link próprio (/acesso/<n>-<código>).
+// Guardamos as cartas do painel como um JSON (slotKey -> cardId), identificado
+// pelo código do link. Ao enviar, status vira 'completed' e o link é encerrado.
+const BAIRRO_DDL = `
+  CREATE TABLE IF NOT EXISTS bairro_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE NOT NULL,
+    group_name TEXT NOT NULL DEFAULT '',
+    board INTEGER NOT NULL DEFAULT 1,
+    placements TEXT NOT NULL DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'in_progress',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    completed_at TEXT
+  );
+`;
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,6 +70,7 @@ db.exec(`
 
   ${SUBMISSIONS_DDL}
   ${PLACEMENTS_DDL}
+  ${BAIRRO_DDL}
 `);
 
 // Migração: bancos antigos amarravam a submissão a `users(id)` via user_id.

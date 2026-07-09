@@ -1,0 +1,287 @@
+:root {
+  /* Paleta extraída do tabuleiro e dos painéis "Nosso Bairro" (PLANEHAB / Governo da Bahia / FDTE) */
+  --color-bg: #f6e7cd;
+  --color-bg-deep: #ecd2a4;
+  --color-paper: #faf1e0;
+  --color-ink: #3b2a20;
+  --color-ink-soft: #6b4f3a;
+  --color-ink-faint: #9a8268;
+
+  --color-primary: #bf6632;
+  --color-primary-dark: #934c22;
+  --color-primary-soft: #eacbb4;
+
+  --color-secondary: #2fa9b8;
+  --color-secondary-dark: #1f7a86;
+  --color-secondary-soft: #c9eef2;
+
+  --color-accent: #f2a93b;
+  --color-accent-dark: #c97f17;
+
+  --color-surface: #ffffff;
+  --color-success: #3f9142;
+  --color-danger: #c53d3d;
+
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+
+  --shadow-card: 0 6px 18px rgba(59, 42, 32, 0.18);
+  --shadow-soft: 0 2px 8px rgba(59, 42, 32, 0.12);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fundo de mural (tela de identificação e onboarding). */
+.mural-bg {
+  background-image: url('../assets/bg/mural.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  border: 3px solid var(--color-ink);
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  background: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+}
+
+.btn-ghost {
+  background: var(--color-primary-soft);
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.onboarding-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+/* Em telas estreitas os botões empilham: "Próximo" em cima, "Voltar" embaixo. */
+@media (max-width: 460px) {
+  .onboarding-nav {
+    flex-direction: column-reverse;
+  }
+  .onboarding-nav .btn {
+    width: 100%;
+  }
+}
+
+.btn-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(59, 42, 32, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal-box {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 28px 32px;
+  max-width: 90vw;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.card-surface {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+/* Preview do tabuleiro: em modo retrato (celular) gira 90° para aparecer grande. */
+.board-preview-img {
+  max-width: 96vw;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+@media (orientation: portrait) {
+  .board-preview-img {
+    max-width: 90vh;
+    max-height: 96vw;
+    transform: rotate(90deg);
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.field label {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field input,
+.field select {
+  border: 2px solid var(--color-ink-faint);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 1rem;
+  background: white;
+  color: var(--color-ink);
+}
+
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23757575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+/* Enquanto nenhuma opção válida está selecionada (required + opção vazia), o texto fica cinza como um placeholder. */
+.field select:invalid {
+  color: rgb(117, 117, 117);
+}
+
+.field select option {
+  color: var(--color-ink);
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.error-text {
+  color: var(--color-danger);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--color-secondary-soft);
+  color: var(--color-secondary-dark);
+}

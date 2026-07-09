@@ -102,9 +102,11 @@ export function TransmissionButton() {
 
   // Gera N grupos, cada um com um link de acesso próprio.
   function chooseQuantity(n: number) {
+    // O número do grupo vai embutido no link (/acesso/<n>-<codigo>) para que cada
+    // grupo abra o tabuleiro na sua cor no Jogo do Bairro.
     const list = Array.from({ length: n }, (_, i) => ({
       name: `Grupo ${i + 1}`,
-      url: `${LINK_BASE}/${makeCode()}`,
+      url: `${LINK_BASE}/${i + 1}-${makeCode()}`,
     }));
     setGroups(list);
     // Persiste os grupos na sessão para o painel poder exibi-los depois.

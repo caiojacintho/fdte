@@ -3,6 +3,7 @@
 Plataforma com duas frentes:
 
 - `formulario/` — jogo digital (login → onboarding → tabuleiro da casa → painel do bairro → envio)
+- `formulario2/` — **Jogo do Bairro** (Etapa 2): tabuleiro do "Painel Nosso Bairro" acessado pelos links de grupo (`/acesso/<n>-<codigo>`). Cada grupo (1 a 6) abre o tabuleiro na sua cor. Ao clicar em **Enviar respostas**, o link é encerrado (bloqueado) e a resposta aparece no admin, na **Etapa 2** da sessão (via API `/api/bairro`). Só desktop.
 - `admin/` — painel para gestores acompanharem as submissões
 - `server/` — API compartilhada (Node + Express + SQLite embutido)
 
@@ -25,6 +26,11 @@ npm run dev         # http://localhost:5173
 cd admin
 npm install
 npm run dev          # http://localhost:5174
+
+# 4) Jogo do Bairro (Etapa 2 — só desktop)
+cd formulario2
+npm install
+npm run dev          # http://localhost:5176  (abra em /acesso/<codigo>)
 ```
 
 Na primeira execução do servidor, um usuário administrador é criado automaticamente:

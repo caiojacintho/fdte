@@ -50,6 +50,28 @@ adminRouter.get('/submissions/:id', (req, res) => {
   res.json({ submission: { ...submission, placements } });
 });
 
+// Respostas do "Jogo do Bairro" (Etapa 2), para o painel casar cada uma com o
+// grupo da sessão pelo código do link.
+adminRouter.get('/bairro', (req, res) => {
+  const rows = db
+    .prepare(
+      `SELECT code, group_name, board, placements, status, created_at, updated_at, completed_at
+       FROM bairro_submissions
+       ORDER BY updated_at DESC`
+    )
+    .all();
+  const submissions = rows.map((r) => {
+    let placements = {};
+    try {
+      placements = JSON.parse(r.placements || '{}');
+    } catch {
+      placements = {};
+    }
+    return { ...r, placements };
+  });
+  res.json({ submissions });
+});
+
 adminRouter.get('/export.csv', (req, res) => {
   const rows = db
     .prepare(
