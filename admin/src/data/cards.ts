@@ -1,12 +1,5 @@
 export type CardCategory =
-  | 'casa'
-  | 'equipamentos'
-  | 'infraestrutura'
-  | 'mobilidade'
-  | 'riscos'
-  | 'seguranca'
-  | 'tipologia'
-  | 'mudanca';
+  'casa' | 'equipamentos' | 'infraestrutura' | 'mobilidade' | 'riscos' | 'seguranca' | 'tipologia' | 'mudanca';
 
 export interface CardDef {
   id: string;
@@ -64,7 +57,11 @@ export const CARDS: CardDef[] = [
   { id: 'tipologia-03', label: 'Comunidades Quilombolas (PCTs)', category: 'tipologia' },
   { id: 'tipologia-04', label: 'Habitação Multifamiliar em Edifício Adaptado com Retrofit', category: 'tipologia' },
   { id: 'tipologia-05', label: 'Habitação Unifamiliar de Conjuntos Habitacionais', category: 'tipologia' },
-  { id: 'tipologia-06', label: 'Habitação Unifamiliar de Fachada na calçada coroada com platibanda', category: 'tipologia' },
+  {
+    id: 'tipologia-06',
+    label: 'Habitação Unifamiliar de Fachada na calçada coroada com platibanda',
+    category: 'tipologia',
+  },
   { id: 'tipologia-07', label: 'Terras Indígenas (PCTs)', category: 'tipologia' },
   { id: 'tipologia-08', label: 'Habitação Unifamiliar com produção em área costeira', category: 'tipologia' },
   { id: 'tipologia-09', label: 'Habitação Unifamiliar com produção em zona rural', category: 'tipologia' },

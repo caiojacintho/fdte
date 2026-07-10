@@ -80,11 +80,7 @@ export function LoginPage() {
 
             <div className="login-row">
               <label className="login-check">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                />
+                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
                 Lembrar-me
               </label>
               <button type="button" className="login-forgot" onClick={() => setForgot(true)}>
@@ -92,11 +88,7 @@ export function LoginPage() {
               </button>
             </div>
 
-            {forgot && (
-              <p className="login-hint">
-                Contate o administrador do sistema para redefinir sua senha.
-              </p>
-            )}
+            {forgot && <p className="login-hint">Contate o administrador do sistema para redefinir sua senha.</p>}
             {error && <span className="error-text">{error}</span>}
 
             <button className="btn btn-block login-submit" type="submit" disabled={loading}>
@@ -106,8 +98,7 @@ export function LoginPage() {
         </div>
 
         <div className="login-footer">
-          © 2026 · Governo do Estado da Bahia · PLANEHAB · Fundação para o Desenvolvimento Tecnológico
-          da Engenharia
+          © 2026 · Governo do Estado da Bahia · PLANEHAB · Fundação para o Desenvolvimento Tecnológico da Engenharia
         </div>
       </div>
 

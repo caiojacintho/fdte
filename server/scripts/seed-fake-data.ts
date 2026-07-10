@@ -1,23 +1,80 @@
 // Popula o banco com dados FALSOS/ALEATÓRIOS para demonstração do painel.
-// Uso: (na pasta server) `node scripts/seed-fake-data.js`
+// Uso: (na pasta server) `npm run db:seed:fake`
 // ATENÇÃO: apaga todas as submissões e placements antes de inserir.
 
 import { randomUUID } from 'node:crypto';
-import { db } from '../src/db.js';
+import { sql } from 'drizzle-orm';
+import { client, db } from '../src/db/index.js';
+import { placements, submissions } from '../src/db/schema.js';
 
 // ---------- Pools de dados fictícios ----------
 const FIRST_NAMES = [
-  'Maria', 'José', 'Ana', 'João', 'Antônio', 'Francisca', 'Carlos', 'Adriana', 'Paulo', 'Juliana',
-  'Marcos', 'Fernanda', 'Luiz', 'Patrícia', 'Rafael', 'Camila', 'Rodrigo', 'Aline', 'Bruno', 'Vanessa',
-  'Tiago', 'Larissa', 'Gustavo', 'Beatriz', 'Diego', 'Sabrina', 'Everton', 'Cláudia', 'Igor', 'Rebeca',
+  'Maria',
+  'José',
+  'Ana',
+  'João',
+  'Antônio',
+  'Francisca',
+  'Carlos',
+  'Adriana',
+  'Paulo',
+  'Juliana',
+  'Marcos',
+  'Fernanda',
+  'Luiz',
+  'Patrícia',
+  'Rafael',
+  'Camila',
+  'Rodrigo',
+  'Aline',
+  'Bruno',
+  'Vanessa',
+  'Tiago',
+  'Larissa',
+  'Gustavo',
+  'Beatriz',
+  'Diego',
+  'Sabrina',
+  'Everton',
+  'Cláudia',
+  'Igor',
+  'Rebeca',
 ];
 const LAST_NAMES = [
-  'Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Pereira', 'Lima', 'Gomes',
-  'Costa', 'Ribeiro', 'Martins', 'Carvalho', 'Almeida', 'Nascimento', 'Araújo', 'Barbosa', 'Rocha', 'Dias',
+  'Silva',
+  'Santos',
+  'Oliveira',
+  'Souza',
+  'Rodrigues',
+  'Ferreira',
+  'Alves',
+  'Pereira',
+  'Lima',
+  'Gomes',
+  'Costa',
+  'Ribeiro',
+  'Martins',
+  'Carvalho',
+  'Almeida',
+  'Nascimento',
+  'Araújo',
+  'Barbosa',
+  'Rocha',
+  'Dias',
 ];
 const CITIES = [
-  'Salvador', 'Feira de Santana', 'Vitória da Conquista', 'Camaçari', 'Itabuna', 'Juazeiro',
-  'Ilhéus', 'Lauro de Freitas', 'Barreiras', 'Porto Seguro', 'Alagoinhas', 'Simões Filho',
+  'Salvador',
+  'Feira de Santana',
+  'Vitória da Conquista',
+  'Camaçari',
+  'Itabuna',
+  'Juazeiro',
+  'Ilhéus',
+  'Lauro de Freitas',
+  'Barreiras',
+  'Porto Seguro',
+  'Alagoinhas',
+  'Simões Filho',
 ];
 const ENTITIES = [
   'Associação de Moradores do Bairro da Paz',
@@ -33,91 +90,142 @@ const ENTITIES = [
 const TIPOLOGIA = Array.from({ length: 15 }, (_, i) => `tipologia-${String(i + 1).padStart(2, '0')}`);
 const MUDANCA = ['mudanca-casa-nova', 'mudanca-reforma'];
 const CASA = [
-  'casa-adaptacao', 'casa-agua', 'casa-aluguel', 'casa-banheiro-1', 'casa-banheiro-2', 'casa-cozinha',
-  'casa-documento', 'casa-endereco', 'casa-esgoto', 'casa-garagem', 'casa-lavanderia', 'casa-luz',
-  'casa-sem-fila', 'casa-parede', 'casa-pisos', 'casa-quarto-1', 'casa-quarto-2', 'casa-quarto-3',
-  'casa-quintal', 'casa-reboco', 'casa-telhado',
+  'casa-adaptacao',
+  'casa-agua',
+  'casa-aluguel',
+  'casa-banheiro-1',
+  'casa-banheiro-2',
+  'casa-cozinha',
+  'casa-documento',
+  'casa-endereco',
+  'casa-esgoto',
+  'casa-garagem',
+  'casa-lavanderia',
+  'casa-luz',
+  'casa-sem-fila',
+  'casa-parede',
+  'casa-pisos',
+  'casa-quarto-1',
+  'casa-quarto-2',
+  'casa-quarto-3',
+  'casa-quintal',
+  'casa-reboco',
+  'casa-telhado',
 ];
 const PAINEL = [
-  'arvores', 'centro-cultural', 'creche', 'escola', 'praca', 'quadra', 'saude', 'esgoto', 'iluminacao',
-  'internet', 'lixo', 'agua', 'acessibilidade', 'asfalto-calcada', 'calcada', 'ciclovia', 'transporte',
-  'seguranca', 'contencao', 'enchente',
+  'arvores',
+  'centro-cultural',
+  'creche',
+  'escola',
+  'praca',
+  'quadra',
+  'saude',
+  'esgoto',
+  'iluminacao',
+  'internet',
+  'lixo',
+  'agua',
+  'acessibilidade',
+  'asfalto-calcada',
+  'calcada',
+  'ciclovia',
+  'transporte',
+  'seguranca',
+  'contencao',
+  'enchente',
 ];
 
 // ---------- Helpers ----------
-const rand = (n) => Math.floor(Math.random() * n);
-const pick = (arr) => arr[rand(arr.length)];
-const chance = (p) => Math.random() < p;
+const rand = (n: number): number => Math.floor(Math.random() * n);
+const pick = <T>(arr: T[]): T => arr[rand(arr.length)];
+const chance = (p: number): boolean => Math.random() < p;
 
-function pickMany(arr, min, max) {
+function pickMany<T>(arr: T[], min: number, max: number): T[] {
   const count = min + rand(max - min + 1);
   const pool = [...arr];
-  const out = [];
+  const out: T[] = [];
   for (let i = 0; i < count && pool.length; i++) {
     out.push(pool.splice(rand(pool.length), 1)[0]);
   }
   return out;
 }
 
-// Data no passado (até `daysAgo` dias) no formato do SQLite: "YYYY-MM-DD HH:MM:SS".
-function pastDateTime(maxDaysAgo) {
+// Data no passado (até `maxDaysAgo` dias) no formato "YYYY-MM-DD HH:MM:SS".
+// Continua no formato de string do SQLite - funciona como literal de
+// timestamp aceito pelo Postgres também (interpretado no fuso do servidor).
+function pastDateTime(maxDaysAgo: number): string {
   const ms = Date.now() - rand(maxDaysAgo * 24 * 60 * 60 * 1000);
   return new Date(ms).toISOString().slice(0, 19).replace('T', ' ');
 }
 
-// ---------- Limpeza ----------
-console.log('[seed-fake] limpando placements e submissions…');
-db.exec('DELETE FROM placements;');
-db.exec('DELETE FROM submissions;');
+async function main(): Promise<void> {
+  // ---------- Limpeza ----------
+  // placements referencia submissions via FK - apaga os filhos primeiro.
+  console.log('[seed-fake] limpando placements e submissions…');
+  await db.delete(placements);
+  await db.delete(submissions);
 
-// ---------- Inserção ----------
-const TOTAL = 24;
-const insertSubmission = db.prepare(
-  `INSERT INTO submissions (token, name, city, entity, status, created_at, updated_at, completed_at)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-);
-const insertPlacement = db.prepare(
-  `INSERT INTO placements (submission_id, board, slot_key, card_id, created_at)
-   VALUES (?, ?, ?, ?, ?)`
-);
+  // ---------- Inserção ----------
+  const TOTAL = 24;
+  let completed = 0;
 
-let completed = 0;
+  for (let i = 0; i < TOTAL; i++) {
+    const name = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)} ${pick(LAST_NAMES)}`;
+    const createdAt = pastDateTime(30);
 
-for (let i = 0; i < TOTAL; i++) {
-  const name = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)} ${pick(LAST_NAMES)}`;
-  const createdAt = pastDateTime(30);
+    const isCompleted = chance(0.75);
+    if (isCompleted) completed++;
+    const completedAt = isCompleted ? pastDateTime(20) : null;
 
-  const isCompleted = chance(0.75);
-  if (isCompleted) completed++;
-  const completedAt = isCompleted ? pastDateTime(20) : null;
-  const subInfo = insertSubmission.run(
-    randomUUID(),
-    name,
-    pick(CITIES),
-    pick(ENTITIES),
-    isCompleted ? 'completed' : 'in_progress',
-    createdAt,
-    completedAt || createdAt,
-    completedAt
+    const [inserted] = await db
+      .insert(submissions)
+      .values({
+        token: randomUUID(),
+        name,
+        city: pick(CITIES),
+        entity: pick(ENTITIES),
+        status: isCompleted ? 'completed' : 'in_progress',
+        createdAt,
+        updatedAt: completedAt || createdAt,
+        completedAt,
+      })
+      .returning({ id: submissions.id });
+
+    const submissionId = inserted.id;
+
+    // Etapa 1 e 2 (1 carta cada), Etapa 3 - o que a casa precisa (3 a 8
+    // cartas), Etapa 4 - o que o bairro precisa (4 a 10 cartas).
+    await db.insert(placements).values([
+      { submissionId, board: 'tabuleiro', slotKey: 'como_e_hoje', cardId: pick(TIPOLOGIA), createdAt },
+      { submissionId, board: 'tabuleiro', slotKey: 'como_mudar', cardId: pick(MUDANCA), createdAt },
+      ...pickMany(CASA, 3, 8).map((cardId, idx) => ({
+        submissionId,
+        board: 'tabuleiro',
+        slotKey: `precisa_${idx + 1}`,
+        cardId,
+        createdAt,
+      })),
+      ...pickMany(PAINEL, 4, 10).map((cardId, idx) => ({
+        submissionId,
+        board: 'painel',
+        slotKey: `hex_${idx + 1}`,
+        cardId,
+        createdAt,
+      })),
+    ]);
+  }
+
+  const [{ total }] = await db.select({ total: sql<number>`count(*)::int` }).from(placements);
+  console.log(
+    `[seed-fake] pronto: ${TOTAL} participantes (${completed} enviadas, ${TOTAL - completed} em andamento), ${total} cartas.`
   );
-  const submissionId = subInfo.lastInsertRowid;
-
-  // Etapa 1 e 2 (1 carta cada)
-  insertPlacement.run(submissionId, 'tabuleiro', 'como_e_hoje', pick(TIPOLOGIA), createdAt);
-  insertPlacement.run(submissionId, 'tabuleiro', 'como_mudar', pick(MUDANCA), createdAt);
-
-  // Etapa 3 — o que a casa precisa (3 a 8 cartas)
-  pickMany(CASA, 3, 8).forEach((cardId, idx) => {
-    insertPlacement.run(submissionId, 'tabuleiro', `precisa_${idx + 1}`, cardId, createdAt);
-  });
-
-  // Etapa 4 — o que o bairro precisa (4 a 10 cartas)
-  pickMany(PAINEL, 4, 10).forEach((cardId, idx) => {
-    insertPlacement.run(submissionId, 'painel', `hex_${idx + 1}`, cardId, createdAt);
-  });
 }
 
-const placementsCount = db.prepare('SELECT COUNT(*) AS n FROM placements').get().n;
-console.log(
-  `[seed-fake] pronto: ${TOTAL} participantes (${completed} enviadas, ${TOTAL - completed} em andamento), ${placementsCount} cartas.`
-);
+main()
+  .catch((err: unknown) => {
+    console.error(err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await client.end();
+  });

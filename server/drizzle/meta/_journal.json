@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1783687144370,
+      "tag": "0000_watery_dakota_north",
+      "breakpoints": true
+    }
+  ]
+}

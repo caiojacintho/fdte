@@ -1,0 +1,32 @@
+{
+  "name": "fdte",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": [
+    "admin",
+    "formulario",
+    "formulario2",
+    "server",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n server,admin,formulario,formulario2 -c blue,green,yellow,magenta \"npm run dev -w server\" \"npm run dev -w admin\" \"npm run dev -w formulario\" \"npm run dev -w formulario2\"",
+    "lint": "eslint .",
+    "format": "prettier --write --ignore-unknown .",
+    "format:check": "prettier --check --ignore-unknown .",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^9.1.0",
+    "eslint": "^10.6.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.7.0",
+    "prettier": "^3.9.5",
+    "typescript-eslint": "^8.63.0"
+  }
+}

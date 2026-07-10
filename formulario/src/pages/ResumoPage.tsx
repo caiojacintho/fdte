@@ -4,12 +4,7 @@ import { GameHeader } from '../components/layout/GameHeader';
 import { useSubmission } from '../submission/SubmissionContext';
 import { buildImageFile, shareFile } from '../lib/share';
 import { getCard } from '../data/cards';
-import {
-  TABULEIRO_BOARD,
-  COMO_E_HOJE_SLOT,
-  COMO_MUDAR_SLOT,
-  PRECISA_SLOTS,
-} from '../data/boardLayout';
+import { TABULEIRO_BOARD, COMO_E_HOJE_SLOT, COMO_MUDAR_SLOT, PRECISA_SLOTS } from '../data/boardLayout';
 
 function MiniCard({ cardId }: { cardId: string | null }) {
   const card = getCard(cardId);
@@ -238,12 +233,7 @@ export function ResumoPage() {
           </div>
         ) : (
           <>
-            <button
-              className="btn btn-block"
-              type="button"
-              disabled={sharing}
-              onClick={handleShare}
-            >
+            <button className="btn btn-block" type="button" disabled={sharing} onClick={handleShare}>
               {sharing ? 'Gerando...' : 'Compartilhar'}
             </button>
             <button
@@ -299,13 +289,7 @@ export function ResumoPage() {
             ) : (
               <p style={{ color: 'var(--color-ink-soft)', margin: 0 }}>Gerando o tabuleiro…</p>
             )}
-            <button
-              className="btn"
-              type="button"
-              style={{ marginTop: 12 }}
-              disabled={sharing}
-              onClick={handleShare}
-            >
+            <button className="btn" type="button" style={{ marginTop: 12 }} disabled={sharing} onClick={handleShare}>
               {sharing ? 'Gerando...' : 'Compartilhar'}
             </button>
             <button
@@ -317,9 +301,7 @@ export function ResumoPage() {
             >
               Concluir
             </button>
-            {shareNote && (
-              <p style={{ color: 'var(--color-ink-soft)', fontSize: '0.9rem', margin: 0 }}>{shareNote}</p>
-            )}
+            {shareNote && <p style={{ color: 'var(--color-ink-soft)', fontSize: '0.9rem', margin: 0 }}>{shareNote}</p>}
           </div>
         </div>
       )}

@@ -1,3 +1,5 @@
+import type { SubmissionDTO } from '@fdte/shared-types';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 // Token da submissão anônima atual (gerado ao preencher a tela de identificação).
@@ -43,24 +45,5 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
-  completeSubmission: () =>
-    request<{ submission: SubmissionDTO }>('/api/submission/complete', { method: 'POST' }),
+  completeSubmission: () => request<{ submission: SubmissionDTO }>('/api/submission/complete', { method: 'POST' }),
 };
-
-export interface PlacementDTO {
-  board: string;
-  slot_key: string;
-  card_id: string;
-}
-
-export interface SubmissionDTO {
-  id: number;
-  name: string;
-  city: string;
-  entity: string;
-  status: 'in_progress' | 'completed';
-  created_at: string;
-  updated_at: string;
-  completed_at: string | null;
-  placements: PlacementDTO[];
-}

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { api, type UserDTO } from '../api/client';
+import { api } from '../api/client';
+import type { UserDTO } from '@fdte/shared-types';
 import { clearToken, getToken, setToken } from './token';
 
 interface AuthContextValue {

@@ -3,8 +3,18 @@ import { Calendar as CalIcon, ChevronLeft, ChevronRight, Clock } from 'lucide-re
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MONTHS = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
 ];
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -60,9 +70,7 @@ export function DateField({ value, onChange }: { value: string; onChange: (v: st
     });
   }
 
-  const display = value
-    ? `${value.slice(8, 10)}/${value.slice(5, 7)}/${value.slice(0, 4)}`
-    : 'dd/mm/aaaa';
+  const display = value ? `${value.slice(8, 10)}/${value.slice(5, 7)}/${value.slice(0, 4)}` : 'dd/mm/aaaa';
 
   return (
     <div className="picker" ref={ref}>

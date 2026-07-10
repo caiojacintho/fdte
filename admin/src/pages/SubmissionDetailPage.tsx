@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Header } from '../components/Header';
-import { api, type PlacementDTO, type SubmissionDetail } from '../api/client';
+import { api } from '../api/client';
+import type { PlacementDTO, SubmissionDetail } from '@fdte/shared-types';
 import { getCard, type CardDef } from '../data/cards';
 import { getCardImage } from '../data/cardImages';
 import { buildBoardUrl } from '../lib/board';
@@ -34,9 +35,7 @@ export function SubmissionDetailPage() {
     .filter((p) => p.board === 'tabuleiro' && p.slot_key.startsWith('precisa_'))
     .sort((a, b) => a.slot_key.localeCompare(b.slot_key, undefined, { numeric: true }));
 
-  const casaCards = casaPlacements
-    .map((p) => getCard(p.card_id))
-    .filter((c): c is CardDef => Boolean(c));
+  const casaCards = casaPlacements.map((p) => getCard(p.card_id)).filter((c): c is CardDef => Boolean(c));
 
   // Gera a imagem do tabuleiro com as cartas do participante, na mesma ordem.
   async function handleViewBoard() {
@@ -50,9 +49,7 @@ export function SubmissionDetailPage() {
         entity: submission.entity,
         comoEHoje: getCardImage(findTabuleiro('como_e_hoje')),
         comoMudar: getCardImage(findTabuleiro('como_mudar')),
-        precisa: casaPlacements
-          .map((p) => getCardImage(p.card_id))
-          .filter((img): img is string => Boolean(img)),
+        precisa: casaPlacements.map((p) => getCardImage(p.card_id)).filter((img): img is string => Boolean(img)),
       });
       setBoardUrl(url);
     } catch {
@@ -79,12 +76,7 @@ export function SubmissionDetailPage() {
             <ArrowLeft size={16} />
           </Link>
           {submission && (
-            <button
-              className="btn btn-secondary"
-              type="button"
-              onClick={handleViewBoard}
-              disabled={boardLoading}
-            >
+            <button className="btn btn-secondary" type="button" onClick={handleViewBoard} disabled={boardLoading}>
               {boardLoading ? 'Gerando tabuleiro…' : 'Ver tabuleiro'}
             </button>
           )}
@@ -136,12 +128,7 @@ export function SubmissionDetailPage() {
             className="board-preview-img"
             onClick={(e) => e.stopPropagation()}
           />
-          <button
-            className="btn"
-            type="button"
-            onClick={closeBoard}
-            style={{ position: 'fixed', top: 16, right: 16 }}
-          >
+          <button className="btn" type="button" onClick={closeBoard} style={{ position: 'fixed', top: 16, right: 16 }}>
             Fechar
           </button>
         </div>

@@ -58,14 +58,7 @@ import p4Risco1 from '../assets/img/cards/pergunta4/05-ITEM-RISCOS (1).png';
 import p4Risco2 from '../assets/img/cards/pergunta4/05-ITEM-RISCOS (2).png';
 
 export type CardCategory =
-  | 'casa'
-  | 'equipamentos'
-  | 'infraestrutura'
-  | 'mobilidade'
-  | 'riscos'
-  | 'seguranca'
-  | 'tipologia'
-  | 'mudanca';
+  'casa' | 'equipamentos' | 'infraestrutura' | 'mobilidade' | 'riscos' | 'seguranca' | 'tipologia' | 'mudanca';
 
 export interface CardDef {
   id: string;
@@ -88,7 +81,13 @@ export const CATEGORY_LABELS: Record<CardCategory, string> = {
 };
 
 export const CARDS: CardDef[] = [
-  { id: 'casa-adaptacao', label: 'Adaptação para idosos ou PCD', category: 'casa', image: casaAdaptacao, hideLabel: true },
+  {
+    id: 'casa-adaptacao',
+    label: 'Adaptação para idosos ou PCD',
+    category: 'casa',
+    image: casaAdaptacao,
+    hideLabel: true,
+  },
   { id: 'casa-agua', label: 'Água', category: 'casa', image: casaAgua, hideLabel: true },
   { id: 'casa-aluguel', label: 'Aluguel mais baixo', category: 'casa', image: casaAluguel, hideLabel: true },
   { id: 'casa-banheiro-1', label: 'Banheiro', category: 'casa', image: casaBanheiro1, hideLabel: true },
@@ -109,21 +108,76 @@ export const CARDS: CardDef[] = [
   { id: 'casa-quintal', label: 'Quintal ou horta', category: 'casa', image: casaQuintal, hideLabel: true },
   { id: 'casa-reboco', label: 'Reboco ou pintura', category: 'casa', image: casaReboco, hideLabel: true },
   { id: 'casa-telhado', label: 'Telhado', category: 'casa', image: casaTelhado, hideLabel: true },
-  { id: 'tipologia-01', label: 'Habitação Multifamiliar de Conjuntos Habitacionais', category: 'tipologia', image: tipologia01 },
-  { id: 'tipologia-02', label: 'Comunidades de Fundo e Fecho de Pasto (PCTs)', category: 'tipologia', image: tipologia02 },
+  {
+    id: 'tipologia-01',
+    label: 'Habitação Multifamiliar de Conjuntos Habitacionais',
+    category: 'tipologia',
+    image: tipologia01,
+  },
+  {
+    id: 'tipologia-02',
+    label: 'Comunidades de Fundo e Fecho de Pasto (PCTs)',
+    category: 'tipologia',
+    image: tipologia02,
+  },
   { id: 'tipologia-03', label: 'Comunidades Quilombolas (PCTs)', category: 'tipologia', image: tipologia03 },
-  { id: 'tipologia-04', label: 'Habitação Multifamiliar em Edifício Adaptado com Retrofit', category: 'tipologia', image: tipologia04 },
-  { id: 'tipologia-05', label: 'Habitação Unifamiliar de Conjuntos Habitacionais', category: 'tipologia', image: tipologia05 },
-  { id: 'tipologia-06', label: 'Habitação Unifamiliar de Fachada na calçada coroada com platibanda', category: 'tipologia', image: tipologia06 },
+  {
+    id: 'tipologia-04',
+    label: 'Habitação Multifamiliar em Edifício Adaptado com Retrofit',
+    category: 'tipologia',
+    image: tipologia04,
+  },
+  {
+    id: 'tipologia-05',
+    label: 'Habitação Unifamiliar de Conjuntos Habitacionais',
+    category: 'tipologia',
+    image: tipologia05,
+  },
+  {
+    id: 'tipologia-06',
+    label: 'Habitação Unifamiliar de Fachada na calçada coroada com platibanda',
+    category: 'tipologia',
+    image: tipologia06,
+  },
   { id: 'tipologia-07', label: 'Terras Indígenas (PCTs)', category: 'tipologia', image: tipologia07 },
-  { id: 'tipologia-08', label: 'Habitação Unifamiliar com produção em área costeira', category: 'tipologia', image: tipologia08 },
-  { id: 'tipologia-09', label: 'Habitação Unifamiliar com produção em zona rural', category: 'tipologia', image: tipologia09 },
-  { id: 'tipologia-10', label: 'Habitação Unifamiliar em Bairro Residencial Formal', category: 'tipologia', image: tipologia10 },
-  { id: 'tipologia-11', label: 'Autoconstrução em Favelas e Comunidades Urbanas', category: 'tipologia', image: tipologia11 },
-  { id: 'tipologia-12', label: 'Ocupação com Domicílios Rústicos sem paredes estruturais', category: 'tipologia', image: tipologia12 },
+  {
+    id: 'tipologia-08',
+    label: 'Habitação Unifamiliar com produção em área costeira',
+    category: 'tipologia',
+    image: tipologia08,
+  },
+  {
+    id: 'tipologia-09',
+    label: 'Habitação Unifamiliar com produção em zona rural',
+    category: 'tipologia',
+    image: tipologia09,
+  },
+  {
+    id: 'tipologia-10',
+    label: 'Habitação Unifamiliar em Bairro Residencial Formal',
+    category: 'tipologia',
+    image: tipologia10,
+  },
+  {
+    id: 'tipologia-11',
+    label: 'Autoconstrução em Favelas e Comunidades Urbanas',
+    category: 'tipologia',
+    image: tipologia11,
+  },
+  {
+    id: 'tipologia-12',
+    label: 'Ocupação com Domicílios Rústicos sem paredes estruturais',
+    category: 'tipologia',
+    image: tipologia12,
+  },
   { id: 'tipologia-13', label: 'Comunidade de Pescadores Artesanais', category: 'tipologia', image: tipologia13 },
   { id: 'tipologia-14', label: 'Habitação Multifamiliar em Área Central', category: 'tipologia', image: tipologia14 },
-  { id: 'tipologia-15', label: 'Habitação Unifamiliar em Unidade Produtiva Coletiva Rural', category: 'tipologia', image: tipologia15 },
+  {
+    id: 'tipologia-15',
+    label: 'Habitação Unifamiliar em Unidade Produtiva Coletiva Rural',
+    category: 'tipologia',
+    image: tipologia15,
+  },
   { id: 'mudanca-casa-nova', label: 'Casa Nova', category: 'mudanca', image: mudancaCasaNova },
   { id: 'mudanca-reforma', label: 'Reforma', category: 'mudanca', image: mudancaReforma },
 ];

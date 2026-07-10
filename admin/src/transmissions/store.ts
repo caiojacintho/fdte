@@ -55,10 +55,7 @@ export function addTransmission(data: Omit<Transmission, 'id' | 'createdAt'>): T
   return item;
 }
 
-export function updateTransmission(
-  id: string,
-  patch: Partial<Omit<Transmission, 'id' | 'createdAt'>>
-): void {
+export function updateTransmission(id: string, patch: Partial<Omit<Transmission, 'id' | 'createdAt'>>): void {
   write(read().map((t) => (t.id === id ? { ...t, ...patch } : t)));
 }
 

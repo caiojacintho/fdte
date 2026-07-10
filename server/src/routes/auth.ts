@@ -1,123 +1,74 @@
-import { Router } from 'express';
-import { db } from '../db.js';
+import { Hono } from 'hono';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/index.js';
+import { users } from '../db/schema.js';
 import { hashPassword, verifyPassword, signToken, authMiddleware } from '../auth.js';
 
-export const authRouter = Router();
+export const authRoutes = new Hono();
 
-function publicUser(user) {
+function publicUser(user: typeof users.$inferSelect) {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     entity: user.entity,
     city: user.city,
-    cpf: user.cpf ?? '',
     role: user.role,
-    created_at: user.created_at,
+    created_at: user.createdAt,
   };
 }
 
-authRouter.post('/register', (req, res) => {
-  const { name, email, password, entity, city, cpf } = req.body || {};
+// NOTE: `POST /register` and `PATCH /me` are intentionally not ported - both
+// referenced a `cpf` column that never existed in the schema (dead/broken
+// code), per AGENTS.md/D12. Hono's default 404 handler covers them.
 
-  if (!name || !email || !password || !entity || !city || !cpf) {
-    return res.status(400).json({ error: 'Preencha nome, e-mail, senha, entidade, cidade e CPF.' });
-  }
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres.' });
-  }
-  const cpfDigits = String(cpf).replace(/\D/g, '');
-  if (cpfDigits.length !== 11) {
-    return res.status(400).json({ error: 'CPF inválido. Informe os 11 dígitos.' });
-  }
-
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
-  if (existing) {
-    return res.status(409).json({ error: 'Já existe uma conta com este e-mail.' });
-  }
-
-  const hash = hashPassword(password);
-  const info = db
-    .prepare(
-      `INSERT INTO users (name, email, password_hash, entity, city, cpf, role)
-       VALUES (?, ?, ?, ?, ?, ?, 'user')`
-    )
-    .run(name.trim(), email.toLowerCase().trim(), hash, entity.trim(), city.trim(), cpfDigits);
-
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
-  const token = signToken(user);
-  res.status(201).json({ token, user: publicUser(user) });
-});
-
-authRouter.post('/login', (req, res) => {
-  const { email, password } = req.body || {};
+authRoutes.post('/login', async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const { email, password } = body ?? {};
   if (!email || !password) {
-    return res.status(400).json({ error: 'Informe e-mail e senha.' });
+    return c.json({ error: 'Informe e-mail e senha.' }, 400);
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
-  if (!user || !verifyPassword(password, user.password_hash)) {
-    return res.status(401).json({ error: 'E-mail ou senha inválidos.' });
+  const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim())).limit(1);
+
+  if (!user || !verifyPassword(password, user.passwordHash)) {
+    return c.json({ error: 'E-mail ou senha inválidos.' }, 401);
   }
 
   const token = signToken(user);
-  res.json({ token, user: publicUser(user) });
+  return c.json({ token, user: publicUser(user) });
 });
 
-authRouter.get('/me', authMiddleware, (req, res) => {
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.sub);
-  if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
-  res.json({ user: publicUser(user) });
-});
-
-// Atualiza os dados de cadastro (o e-mail não pode ser alterado).
-authRouter.patch('/me', authMiddleware, (req, res) => {
-  const { name, entity, city, cpf } = req.body || {};
-
-  if (!name || !entity || !city || !cpf) {
-    return res.status(400).json({ error: 'Preencha nome, entidade, cidade e CPF.' });
-  }
-  const cpfDigits = String(cpf).replace(/\D/g, '');
-  if (cpfDigits.length !== 11) {
-    return res.status(400).json({ error: 'CPF inválido. Informe os 11 dígitos.' });
-  }
-
-  const existing = db.prepare('SELECT id FROM users WHERE id = ?').get(req.user.sub);
-  if (!existing) return res.status(404).json({ error: 'Usuário não encontrado.' });
-
-  db.prepare('UPDATE users SET name = ?, entity = ?, city = ?, cpf = ? WHERE id = ?').run(
-    name.trim(),
-    entity.trim(),
-    city.trim(),
-    cpfDigits,
-    req.user.sub
-  );
-
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.sub);
-  res.json({ user: publicUser(user) });
+authRoutes.get('/me', authMiddleware, async (c) => {
+  const auth = c.get('user');
+  const [user] = await db.select().from(users).where(eq(users.id, auth.sub)).limit(1);
+  if (!user) return c.json({ error: 'Usuário não encontrado.' }, 404);
+  return c.json({ user: publicUser(user) });
 });
 
 // Altera a senha do usuário autenticado (exige a senha atual).
-authRouter.patch('/password', authMiddleware, (req, res) => {
-  const { currentPassword, newPassword } = req.body || {};
+authRoutes.patch('/password', authMiddleware, async (c) => {
+  const auth = c.get('user');
+  const body = await c.req.json().catch(() => ({}));
+  const { currentPassword, newPassword } = body ?? {};
 
   if (!currentPassword || !newPassword) {
-    return res.status(400).json({ error: 'Informe a senha atual e a nova senha.' });
+    return c.json({ error: 'Informe a senha atual e a nova senha.' }, 400);
   }
   if (newPassword.length < 6) {
-    return res.status(400).json({ error: 'A nova senha deve ter pelo menos 6 caracteres.' });
+    return c.json({ error: 'A nova senha deve ter pelo menos 6 caracteres.' }, 400);
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.sub);
-  if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
-  if (!verifyPassword(currentPassword, user.password_hash)) {
-    return res.status(401).json({ error: 'A senha atual está incorreta.' });
+  const [user] = await db.select().from(users).where(eq(users.id, auth.sub)).limit(1);
+  if (!user) return c.json({ error: 'Usuário não encontrado.' }, 404);
+  if (!verifyPassword(currentPassword, user.passwordHash)) {
+    return c.json({ error: 'A senha atual está incorreta.' }, 401);
   }
 
-  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(
-    hashPassword(newPassword),
-    req.user.sub
-  );
+  await db
+    .update(users)
+    .set({ passwordHash: hashPassword(newPassword) })
+    .where(eq(users.id, auth.sub));
 
-  res.json({ ok: true });
+  return c.json({ ok: true });
 });

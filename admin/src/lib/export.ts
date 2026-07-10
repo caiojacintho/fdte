@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import type { SubmissionListItem } from '../api/client';
+import type { SubmissionListItem } from '@fdte/shared-types';
 
 export type ExportFormat = 'csv' | 'xlsx';
 
@@ -65,11 +65,7 @@ function exportXlsx(rows: SubmissionListItem[], filename: string) {
   XLSX.writeFile(wb, `${filename}.xlsx`);
 }
 
-export function exportSubmissions(
-  rows: SubmissionListItem[],
-  format: ExportFormat,
-  filename = 'respostas'
-) {
+export function exportSubmissions(rows: SubmissionListItem[], format: ExportFormat, filename = 'respostas') {
   if (format === 'csv') exportCsv(rows, filename);
   else exportXlsx(rows, filename);
 }

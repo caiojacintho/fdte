@@ -5,12 +5,6 @@ import { Header } from '../components/Header';
 import { useAuth } from '../auth/AuthContext';
 import { api, ApiError } from '../api/client';
 
-function formatCpf(cpf?: string) {
-  const digits = (cpf ?? '').replace(/\D/g, '');
-  if (digits.length !== 11) return cpf || '—';
-  return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-}
-
 function formatDate(value?: string) {
   if (!value) return '—';
   // O banco guarda "YYYY-MM-DD HH:MM:SS" em UTC; normaliza para ISO.
@@ -27,7 +21,6 @@ export function AccountPage() {
   const fields = [
     { label: 'Nome', value: user.name },
     { label: 'E-mail', value: user.email },
-    { label: 'CPF', value: formatCpf(user.cpf) },
     { label: 'Entidade', value: user.entity || '—' },
     { label: 'Cidade', value: user.city || '—' },
     { label: 'Função', value: user.role === 'admin' ? 'Administrador(a)' : 'Participante' },

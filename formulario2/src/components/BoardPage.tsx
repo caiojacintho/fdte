@@ -3,19 +3,19 @@ import { useParams } from 'react-router-dom';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { Header } from './Header';
 import { CardTray } from './CardTray';
-import { HexSlot } from './HexSlot';
-import { useBoardSensors } from './sensors';
+import { HexSlot, useBoardSensors } from '@fdte/board-kit';
 import { usePlacements } from '../lib/storage';
 import { CARDS, getCard } from '../data/cards';
 import { PAINEL_SLOTS, HEX_W } from '../data/boardLayout';
 import { boardForCode, boardIndexFromCode } from '../data/boards';
-import { api, ApiError, type BairroSubmission } from '../api/client';
+import { api, ApiError } from '../api/client';
+import type { BairroSubmission } from '@fdte/shared-types';
 
 type Viewer = null | 'board' | 'cards';
 
 export function BoardPage() {
   const { code = 'demo' } = useParams();
-  const sensors = useBoardSensors();
+  const sensors = useBoardSensors({ touch: false });
   const { placements, setCard, clearSlot } = usePlacements(code);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [viewer, setViewer] = useState<Viewer>(null);
@@ -52,7 +52,10 @@ export function BoardPage() {
   }, [code]);
 
   const locked = remote?.status === 'completed';
-  const activePlacements = locked ? remote?.placements ?? {} : placements;
+  const activePlacements = useMemo(
+    () => (locked ? (remote?.placements ?? {}) : placements),
+    [locked, remote, placements]
+  );
 
   const usedIds = useMemo(() => new Set(Object.values(activePlacements)), [activePlacements]);
   const draggedCard = activeCardId ? getCard(activeCardId) : undefined;
@@ -111,9 +114,7 @@ export function BoardPage() {
               <div className="question-main">
                 <span className="step-badge">{locked ? 'Link encerrado' : 'Jogo do Bairro'}</span>
                 <h2>
-                  {locked
-                    ? `Respostas do ${group} enviadas. Obrigado!`
-                    : 'Monte o bairro dos sonhos da sua comunidade'}
+                  {locked ? `Respostas do ${group} enviadas. Obrigado!` : 'Monte o bairro dos sonhos da sua comunidade'}
                 </h2>
               </div>
               <div className="question-actions">
@@ -132,7 +133,7 @@ export function BoardPage() {
                 {PAINEL_SLOTS.map((s) => (
                   <HexSlot
                     key={s.key}
-                    slotKey={s.key}
+                    id={s.key}
                     cx={s.cx}
                     cy={s.cy}
                     w={HEX_W}
@@ -150,8 +151,8 @@ export function BoardPage() {
               <div className="tray-locked">
                 <h3 className="tray-heading">Formulário encerrado</h3>
                 <p>
-                  As respostas deste grupo já foram enviadas e não podem mais ser editadas. Você pode
-                  revê-las no painel ao lado.
+                  As respostas deste grupo já foram enviadas e não podem mais ser editadas. Você pode revê-las no painel
+                  ao lado.
                 </p>
               </div>
             ) : (
@@ -216,8 +217,7 @@ export function BoardPage() {
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontSize: '1.2rem', color: 'var(--color-ink)' }}>Enviar respostas?</h2>
             <p style={{ color: 'var(--color-ink-soft)', whiteSpace: 'normal' }}>
-              Depois de enviar, o formulário do <strong>{group}</strong> será encerrado e não poderá mais
-              ser editado.
+              Depois de enviar, o formulário do <strong>{group}</strong> será encerrado e não poderá mais ser editado.
             </p>
             {submitError && <span className="error-text">{submitError}</span>}
             <div style={{ display: 'flex', gap: 10 }}>

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { api, ApiError, SUBMISSION_TOKEN_KEY, type SubmissionDTO } from '../api/client';
+import { api, ApiError, SUBMISSION_TOKEN_KEY } from '../api/client';
+import type { SubmissionDTO } from '@fdte/shared-types';
 
 interface SubmissionContextValue {
   submission: SubmissionDTO | null;
@@ -68,9 +69,7 @@ export function SubmissionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <SubmissionContext.Provider
-      value={{ submission, loading, start, getCard, setCard, complete, refresh }}
-    >
+    <SubmissionContext.Provider value={{ submission, loading, start, getCard, setCard, complete, refresh }}>
       {children}
     </SubmissionContext.Provider>
   );

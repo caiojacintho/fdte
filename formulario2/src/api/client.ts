@@ -1,3 +1,5 @@
+import type { BairroSubmission, SubmitPayload } from '@fdte/shared-types';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export class ApiError extends Error {
@@ -18,23 +20,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new ApiError((data as { error?: string }).error || 'Erro inesperado. Tente novamente.', res.status);
   }
   return data as T;
-}
-
-export interface BairroSubmission {
-  code: string;
-  group_name: string;
-  board: number;
-  status: 'in_progress' | 'completed';
-  placements: Record<string, string>;
-  created_at: string;
-  updated_at: string;
-  completed_at: string | null;
-}
-
-export interface SubmitPayload {
-  placements: Record<string, string>;
-  group: string;
-  board: number;
 }
 
 export const api = {

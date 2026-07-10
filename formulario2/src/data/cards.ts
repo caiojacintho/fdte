@@ -19,12 +19,7 @@ import saude from '../assets/cards/saude.png';
 import seguranca from '../assets/cards/seguranca.png';
 import transportePublico from '../assets/cards/transporte-publico.png';
 
-export type CardCategory =
-  | 'equipamentos'
-  | 'infraestrutura'
-  | 'mobilidade'
-  | 'riscos'
-  | 'seguranca';
+export type CardCategory = 'equipamentos' | 'infraestrutura' | 'mobilidade' | 'riscos' | 'seguranca';
 
 export interface CardDef {
   id: string;

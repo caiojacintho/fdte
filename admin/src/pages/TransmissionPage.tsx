@@ -11,12 +11,23 @@ import {
   updateTransmission,
   type Transmission,
 } from '../transmissions/store';
-import { api, type SubmissionListItem, type BairroSubmissionItem } from '../api/client';
+import { api } from '../api/client';
+import type { SubmissionListItem, BairroSubmission } from '@fdte/shared-types';
 import { bairroCardLabel, codeFromUrl } from '../data/bairroCards';
 
 const MONTHS = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
 ];
 
 function formatDate(iso: string) {
@@ -50,9 +61,7 @@ function isSessionLive(session: Transmission): boolean {
   const now = new Date();
   const start = new Date(`${session.date}T${session.start || '00:00'}:00`);
   if (Number.isNaN(start.getTime()) || now < start) return false;
-  const end = session.end
-    ? new Date(`${session.date}T${session.end}:00`)
-    : new Date(`${session.date}T23:59:59`);
+  const end = session.end ? new Date(`${session.date}T${session.end}:00`) : new Date(`${session.date}T23:59:59`);
   return now <= end;
 }
 
@@ -75,8 +84,8 @@ export function TransmissionPage() {
 
   const [session, setSession] = useState<Transmission | undefined>(() => getTransmission(id));
   const [rows, setRows] = useState<SubmissionListItem[]>([]);
-  const [bairroRows, setBairroRows] = useState<BairroSubmissionItem[]>([]);
-  const [viewGroup, setViewGroup] = useState<{ name: string; sub: BairroSubmissionItem } | null>(null);
+  const [bairroRows, setBairroRows] = useState<BairroSubmission[]>([]);
+  const [viewGroup, setViewGroup] = useState<{ name: string; sub: BairroSubmission } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -104,7 +113,7 @@ export function TransmissionPage() {
       try {
         const [subs, bairro] = await Promise.all([
           api.listSubmissions(),
-          api.listBairroSubmissions().catch(() => ({ submissions: [] as BairroSubmissionItem[] })),
+          api.listBairroSubmissions().catch(() => ({ submissions: [] as BairroSubmission[] })),
         ]);
         if (!active) return;
         setRows(subs.submissions);
@@ -141,7 +150,7 @@ export function TransmissionPage() {
 
   // Casa cada grupo (pelo código do link) com a resposta enviada no Jogo do Bairro.
   const bairroByCode = useMemo(() => {
-    const m = new Map<string, BairroSubmissionItem>();
+    const m = new Map<string, BairroSubmission>();
     bairroRows.forEach((b) => m.set(b.code, b));
     return m;
   }, [bairroRows]);
@@ -193,7 +202,10 @@ export function TransmissionPage() {
         <TransmissionSidebar />
         <main className="app-main" style={{ padding: '28px 24px 80px 0' }}>
           {!session ? (
-            <div className="table-wrap" style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-faint)' }}>
+            <div
+              className="table-wrap"
+              style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-faint)' }}
+            >
               Sessão não encontrada.
             </div>
           ) : (
@@ -325,7 +337,10 @@ export function TransmissionPage() {
                               <td style={{ color: 'var(--text-soft)' }}>{g.url}</td>
                               <td>
                                 {done ? (
-                                  <span className="live-badge ended" style={{ background: 'var(--ok-soft, #e3f3e4)', color: '#2f7a34' }}>
+                                  <span
+                                    className="live-badge ended"
+                                    style={{ background: 'var(--ok-soft, #e3f3e4)', color: '#2f7a34' }}
+                                  >
                                     Enviada · {count} {count === 1 ? 'carta' : 'cartas'}
                                   </span>
                                 ) : (
@@ -343,10 +358,7 @@ export function TransmissionPage() {
                           );
                         })
                       ) : (
-                        <EmptyRow
-                          icon={<Users size={28} />}
-                          message="Nenhum grupo criado para esta sessão."
-                        />
+                        <EmptyRow icon={<Users size={28} />} message="Nenhum grupo criado para esta sessão." />
                       )}
                     </tbody>
                   </table>
@@ -379,11 +391,7 @@ export function TransmissionPage() {
                           />
                         ) : (
                           sent.map((s) => (
-                            <tr
-                              key={s.id}
-                              className="row-clickable"
-                              onClick={() => navigate(`/submissoes/${s.id}`)}
-                            >
+                            <tr key={s.id} className="row-clickable" onClick={() => navigate(`/submissoes/${s.id}`)}>
                               <td>
                                 <div style={{ fontWeight: 600 }}>{s.name}</div>
                               </td>
@@ -425,12 +433,7 @@ export function TransmissionPage() {
               <div>
                 <h2 style={{ fontSize: '1.15rem' }}>Links dos grupos</h2>
               </div>
-              <button
-                className="modal-close"
-                type="button"
-                aria-label="Fechar"
-                onClick={() => setShowGroups(false)}
-              >
+              <button className="modal-close" type="button" aria-label="Fechar" onClick={() => setShowGroups(false)}>
                 <X size={18} />
               </button>
             </div>
@@ -441,12 +444,7 @@ export function TransmissionPage() {
                   <div className="field" key={i}>
                     <label>{g.name}</label>
                     <div className="copy-field">
-                      <input
-                        className="input"
-                        readOnly
-                        value={g.url}
-                        onFocus={(e) => e.target.select()}
-                      />
+                      <input className="input" readOnly value={g.url} onFocus={(e) => e.target.select()} />
                       <button
                         className="btn btn-secondary"
                         type="button"
@@ -516,15 +514,11 @@ export function TransmissionPage() {
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontSize: '1.15rem' }}>Excluir sessão</h2>
             <p style={{ color: 'var(--text-soft)', fontSize: '0.9rem', marginTop: 6 }}>
-              Tem certeza que deseja excluir esta sessão? Esta ação não pode ser desfeita e o link
-              de acesso deixará de funcionar.
+              Tem certeza que deseja excluir esta sessão? Esta ação não pode ser desfeita e o link de acesso deixará de
+              funcionar.
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-              <button
-                className="btn btn-secondary btn-block"
-                type="button"
-                onClick={() => setConfirmDelete(false)}
-              >
+              <button className="btn btn-secondary btn-block" type="button" onClick={() => setConfirmDelete(false)}>
                 Cancelar
               </button>
               <button className="btn btn-danger btn-block" type="button" onClick={handleDelete}>

@@ -8,9 +8,7 @@ import { addTransmission, updateTransmission } from '../transmissions/store';
 const LINK_BASE = 'https://consulta.planehab.ba.gov.br/acesso';
 
 function makeCode() {
-  return (
-    Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6)
-  ).toUpperCase();
+  return (Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6)).toUpperCase();
 }
 
 function formatDate(iso: string) {
@@ -65,11 +63,7 @@ export function TransmissionButton() {
   function handleStart() {
     setError(null);
     if (!date || !start || (!noEnd && !end)) {
-      setError(
-        noEnd
-          ? 'Preencha a data e o horário inicial.'
-          : 'Preencha a data e os horários inicial e final.'
-      );
+      setError(noEnd ? 'Preencha a data e o horário inicial.' : 'Preencha a data e os horários inicial e final.');
       return;
     }
     if (!noEnd && end <= start) {
@@ -175,11 +169,7 @@ export function TransmissionButton() {
                   </div>
 
                   <label className="checkbox-row">
-                    <input
-                      type="checkbox"
-                      checked={noEnd}
-                      onChange={(e) => setNoEnd(e.target.checked)}
-                    />
+                    <input type="checkbox" checked={noEnd} onChange={(e) => setNoEnd(e.target.checked)} />
                     <span>Não definir horário final</span>
                   </label>
 
@@ -198,7 +188,12 @@ export function TransmissionButton() {
 
                   {error && <span className="error-text">{error}</span>}
 
-                  <button className="btn btn-block" type="button" onClick={handleStart} style={{ marginTop: 4, padding: '14px 16px' }}>
+                  <button
+                    className="btn btn-block"
+                    type="button"
+                    onClick={handleStart}
+                    style={{ marginTop: 4, padding: '14px 16px' }}
+                  >
                     Iniciar sessão
                   </button>
                 </div>
@@ -307,12 +302,7 @@ export function TransmissionButton() {
                     <div className="field" key={i}>
                       <label>{g.name}</label>
                       <div className="copy-field">
-                        <input
-                          className="input"
-                          readOnly
-                          value={g.url}
-                          onFocus={(e) => e.target.select()}
-                        />
+                        <input className="input" readOnly value={g.url} onFocus={(e) => e.target.select()} />
                         <button
                           className="btn btn-secondary"
                           type="button"

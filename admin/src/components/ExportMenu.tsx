@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Download, FileSpreadsheet, FileText } from 'lucide-react';
-import type { SubmissionListItem } from '../api/client';
+import type { SubmissionListItem } from '@fdte/shared-types';
 import { exportSubmissions, type ExportFormat } from '../lib/export';
 
 export function ExportMenu({
@@ -50,12 +50,7 @@ export function ExportMenu({
           <Download size={16} />
         </button>
       ) : (
-        <button
-          className="btn btn-secondary"
-          type="button"
-          disabled={disabled}
-          onClick={() => setOpen((o) => !o)}
-        >
+        <button className="btn btn-secondary" type="button" disabled={disabled} onClick={() => setOpen((o) => !o)}>
           Exportar
         </button>
       )}

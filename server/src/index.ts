@@ -1,33 +1,56 @@
-import express from 'express';
-import cors from 'cors';
-import { authMiddleware, requireAdmin } from './auth.js';
-import { authRouter } from './routes/auth.js';
-import { submissionRouter } from './routes/submission.js';
-import { bairroRouter } from './routes/bairro.js';
-import { adminRouter } from './routes/admin.js';
-import './db.js';
+import { serve } from '@hono/node-server';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { authRoutes } from './routes/auth.js';
+import { submissionRoutes } from './routes/submission.js';
+import { bairroRoutes } from './routes/bairro.js';
+import { adminRoutes } from './routes/admin.js';
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+const app = new Hono();
+const PORT = Number(process.env.PORT) || 4000;
 
-app.use(cors());
-app.use(express.json());
+app.use('/api/*', cors());
 
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.get('/api/health', (c) => c.json({ ok: true }));
 
-app.use('/api/auth', authRouter);
-// O formulário é público: os participantes não têm conta. Cada submissão é
-// identificada por um token próprio (header X-Submission-Token).
-app.use('/api/submission', submissionRouter);
-// O "Jogo do Bairro" também é público: cada grupo acessa pelo código do link.
-app.use('/api/bairro', bairroRouter);
-app.use('/api/admin', authMiddleware, requireAdmin, adminRouter);
+app.route('/api/auth', authRoutes);
+app.route('/api/submission', submissionRoutes);
+app.route('/api/bairro', bairroRoutes);
+app.route('/api/admin', adminRoutes);
 
-app.use((err, req, res, next) => {
+/**
+ * Extracts a Postgres error code (e.g. '23505') from a thrown error, if
+ * present. The `postgres` driver (and drizzle-orm/postgres-js on top of it)
+ * surfaces the original Postgres error code on a `.code` string property of
+ * the thrown `PostgresError` - duck-typed here instead of an `instanceof`
+ * check so this bootstrap file doesn't need to import the driver directly.
+ */
+function getPostgresErrorCode(err: unknown): string | undefined {
+  if (err && typeof err === 'object' && 'code' in err) {
+    const code = (err as { code?: unknown }).code;
+    return typeof code === 'string' ? code : undefined;
+  }
+  return undefined;
+}
+
+app.onError((err, c) => {
   console.error(err);
-  res.status(500).json({ error: 'Erro interno do servidor.' });
+
+  const pgCode = getPostgresErrorCode(err);
+  if (pgCode === '23505') {
+    // unique_violation - matches today's duplicate-code/email-exists 409 contracts.
+    return c.json({ error: err.message }, 409);
+  }
+  if (pgCode === '23503') {
+    // foreign_key_violation
+    return c.json({ error: err.message }, 400);
+  }
+
+  return c.json({ error: 'Erro interno do servidor.' }, 500);
 });
 
-app.listen(PORT, () => {
-  console.log(`[server] API rodando em http://localhost:${PORT}`);
+app.notFound((c) => c.json({ error: 'Não encontrado.' }, 404));
+
+serve({ fetch: app.fetch, port: PORT }, (info) => {
+  console.log(`[server] API rodando em http://localhost:${info.port}`);
 });

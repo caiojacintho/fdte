@@ -2,17 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DndContext, DragOverlay, useDroppable, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { GameHeader } from '../components/layout/GameHeader';
-import { CardTray } from '../components/dnd/CardTray';
-import { Slot } from '../components/dnd/Slot';
-import { useBoardSensors } from '../components/dnd/sensors';
+import { CardTray, Slot, useBoardSensors } from '@fdte/board-kit';
 import { useSubmission } from '../submission/SubmissionContext';
 import { CARDS, getCard, type CardCategory, type CardDef } from '../data/cards';
-import {
-  TABULEIRO_BOARD,
-  COMO_E_HOJE_SLOT,
-  COMO_MUDAR_SLOT,
-  PRECISA_SLOTS,
-} from '../data/boardLayout';
+import { TABULEIRO_BOARD, COMO_E_HOJE_SLOT, COMO_MUDAR_SLOT, PRECISA_SLOTS } from '../data/boardLayout';
 
 const LIST_ZONE = 'list-zone';
 
@@ -167,10 +160,7 @@ export function TabuleiroPage() {
   }, [stepIndex]);
 
   const usedCardIds = useMemo(
-    () =>
-      new Set(
-        (submission?.placements ?? []).filter((p) => p.board === step.board).map((p) => p.card_id)
-      ),
+    () => new Set((submission?.placements ?? []).filter((p) => p.board === step.board).map((p) => p.card_id)),
     [submission, step.board]
   );
 
@@ -251,7 +241,7 @@ export function TabuleiroPage() {
 
   const draggedCard = activeCardId ? lookupCard(activeCardId) : undefined;
   const placedSingle =
-    step.kind !== 'list' ? lookupCard(getPlacedCardId(step.board, step.slot!)) ?? undefined : undefined;
+    step.kind !== 'list' ? (lookupCard(getPlacedCardId(step.board, step.slot!)) ?? undefined) : undefined;
 
   return (
     <div className={`tabuleiro-page step-${step.key}`}>
@@ -360,8 +350,7 @@ export function TabuleiroPage() {
         <div className="modal-overlay" onClick={() => setShowMaxCards(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <p className="modal-text" style={{ whiteSpace: 'normal' }}>
-              Você já selecionou as 12 cartas. Para escolher outra, remova uma das cartas já
-              selecionadas.
+              Você já selecionou as 12 cartas. Para escolher outra, remova uma das cartas já selecionadas.
             </p>
             <button className="btn" type="button" onClick={() => setShowMaxCards(false)}>
               Entendido

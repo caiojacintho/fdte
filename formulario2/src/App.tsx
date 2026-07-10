@@ -9,8 +9,8 @@ export default function App() {
         <div className="desktop-only-card">
           <h2>Abra em um computador 💻</h2>
           <p>
-            O Jogo do Bairro foi feito para telas grandes. Acesse este link em um desktop ou
-            notebook para arrastar as cartas no painel.
+            O Jogo do Bairro foi feito para telas grandes. Acesse este link em um desktop ou notebook para arrastar as
+            cartas no painel.
           </p>
         </div>
       </div>

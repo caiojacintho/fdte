@@ -1,4 +1,5 @@
 import { getToken } from '../auth/token';
+import type { UserDTO, SubmissionListItem, SubmissionDetail, BairroSubmission, StatsDTO } from '@fdte/shared-types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -26,68 +27,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const data = isJson ? await res.json().catch(() => ({})) : await res.text();
 
   if (!res.ok) {
-    throw new ApiError((data as any)?.error || 'Erro inesperado. Tente novamente.', res.status);
+    throw new ApiError((data as { error?: string })?.error || 'Erro inesperado. Tente novamente.', res.status);
   }
   return data as T;
-}
-
-export interface UserDTO {
-  id: number;
-  name: string;
-  email: string;
-  entity: string;
-  city: string;
-  cpf: string;
-  role: 'user' | 'admin';
-  created_at?: string;
-}
-
-export interface SubmissionListItem {
-  id: number;
-  status: 'in_progress' | 'completed';
-  created_at: string;
-  updated_at: string;
-  completed_at: string | null;
-  name: string;
-  entity: string;
-  city: string;
-}
-
-export interface PlacementDTO {
-  board: string;
-  slot_key: string;
-  card_id: string;
-}
-
-export interface SubmissionDetail extends SubmissionListItem {
-  placements: PlacementDTO[];
-}
-
-export interface BairroSubmissionItem {
-  code: string;
-  group_name: string;
-  board: number;
-  status: 'in_progress' | 'completed';
-  placements: Record<string, string>;
-  created_at: string;
-  updated_at: string;
-  completed_at: string | null;
-}
-
-export interface CardCount {
-  board: string;
-  card_id: string;
-  total: number;
-}
-
-export interface StatsDTO {
-  cardCounts: CardCount[];
-  totals: {
-    total_submissions: number;
-    completed_submissions: number;
-    total_cities: number;
-    total_entities: number;
-  };
 }
 
 export const api = {
@@ -106,9 +48,7 @@ export const api = {
     }),
 
   listSubmissions: (params: { entity?: string; city?: string; status?: string } = {}) => {
-    const query = new URLSearchParams(
-      Object.entries(params).filter(([, v]) => v) as [string, string][]
-    ).toString();
+    const query = new URLSearchParams(Object.entries(params).filter(([, v]) => v) as [string, string][]).toString();
     return request<{ submissions: SubmissionListItem[] }>(`/api/admin/submissions${query ? `?${query}` : ''}`);
   },
 
@@ -116,6 +56,5 @@ export const api = {
 
   getStats: () => request<StatsDTO>('/api/admin/stats'),
 
-  listBairroSubmissions: () =>
-    request<{ submissions: BairroSubmissionItem[] }>('/api/admin/bairro'),
+  listBairroSubmissions: () => request<{ submissions: BairroSubmission[] }>('/api/admin/bairro'),
 };

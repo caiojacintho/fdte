@@ -29,9 +29,7 @@ export function TransmissionSidebar() {
               className={({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`}
             >
               <span className="sidebar-item-date">{formatDate(t.date)}</span>
-              <span className="sidebar-item-time">
-                {t.end ? `${t.start} – ${t.end}` : `${t.start} – aberto`}
-              </span>
+              <span className="sidebar-item-time">{t.end ? `${t.start} – ${t.end}` : `${t.start} – aberto`}</span>
             </NavLink>
           ))}
         </nav>

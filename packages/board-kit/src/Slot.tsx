@@ -1,25 +1,20 @@
 import { useDroppable } from '@dnd-kit/core';
-import type { CardDef } from '../../data/cards';
+import type { BoardCard } from './types';
 
-interface SlotProps {
+export interface SlotProps {
   id: string;
   shape: 'rect' | 'circle';
-  card?: CardDef;
+  card?: BoardCard;
   placeholder?: string;
   onRemove?: () => void;
 }
 
+/** formulario-only (single-card rect/circle drop target). formulario2 has no equivalent. */
 export function Slot({ id, shape, card, placeholder, onRemove }: SlotProps) {
   const { setNodeRef, isOver } = useDroppable({ id, data: { slotId: id } });
-
-  const className = [
-    shape === 'circle' ? 'slot-circle' : 'slot-rect',
-    isOver ? 'over' : '',
-    card ? 'filled' : '',
-  ]
+  const className = [shape === 'circle' ? 'slot-circle' : 'slot-rect', isOver ? 'over' : '', card ? 'filled' : '']
     .filter(Boolean)
     .join(' ');
-
   return (
     <div ref={setNodeRef} className={className}>
       {card ? (
