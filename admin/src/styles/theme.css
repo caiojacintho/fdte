@@ -500,6 +500,48 @@ select.input,
   padding: 22px 24px 24px;
 }
 
+/* Modal mais largo para exibir o tabuleiro preenchido (Etapa 2), que é paisagem. */
+.modal-box-wide {
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Tabuleiro "Nosso Bairro" preenchido (somente leitura) no painel do grupo. */
+.bairro-preview {
+  position: relative;
+  aspect-ratio: 2380 / 1684;
+  width: 100%;
+  margin: 16px 0 4px;
+  line-height: 0;
+}
+
+.bairro-preview-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--ink, #3b2a20);
+}
+
+.bairro-preview-hex {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  aspect-ratio: 1.1547;
+}
+
+.bairro-preview-hex img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 128%;
+  height: 128%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+}
+
 .modal-head {
   display: flex;
   align-items: flex-start;
@@ -887,12 +929,51 @@ select.input,
 }
 
 /* ---------- Página da sessão (transmissão ao vivo) ---------- */
+/* Card que envolve todo o conteúdo da sessão (cabeçalho, estatísticas e tabela). */
+.session-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: 22px 24px 26px;
+}
+
+/* Dentro do card, as estatísticas viram "tiles" suaves e a tabela fica sem o
+   próprio contorno — evita empilhar cartão dentro de cartão. */
+.session-panel .stat-card {
+  background: var(--surface-muted);
+  box-shadow: none;
+}
+
+.session-panel .table-wrap {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.session-panel .table-wrap.table-open thead th {
+  background: transparent;
+}
+
 .session-head {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
+}
+
+/* Coluna direita do cabeçalho: "Encerrar sessão" no topo (alinhado ao título)
+   e os ícones (lixeira/exportar) na base (linha do segmented control). */
+.session-head-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.session-head-side .session-actions {
+  margin-top: auto;
 }
 
 /* As abas Etapa 1 / Etapa 2 ficam abaixo do título, alinhadas à esquerda.
@@ -1070,34 +1151,41 @@ select.input,
 }
 
 /* Segmented control (alterna etapas) */
+/* Segmented control: trilho único com os dois segmentos encostados; o ativo é
+   um "thumb" branco elevado dentro do trilho. */
 .segmented {
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  align-items: stretch;
+  gap: 0;
+  padding: 3px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
 }
 
 .segmented-btn {
-  border: 1px solid transparent;
+  border: none;
   background: transparent;
-  padding: 8px 18px;
+  padding: 7px 20px;
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
+  line-height: 1.2;
   color: var(--text-soft);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.segmented-btn:hover {
+.segmented-btn:hover:not(.active) {
   color: var(--text);
 }
 
-/* Selecionado = botão dentro de um card; não selecionado = fora do card */
+/* Segmento selecionado = thumb branco elevado. */
 .segmented-btn.active {
   background: var(--surface);
   color: var(--text);
-  border-color: var(--border);
   box-shadow: var(--shadow-xs);
+  font-weight: 600;
 }
 
 /* Cartões da sessão: card completo (bg/stroke/sombra), valor e rótulo na mesma
@@ -1282,7 +1370,9 @@ select.input,
   top: 77px;
   height: calc(100vh - 77px);
   overflow-y: auto;
-  padding: 20px 14px;
+  /* Mesmo padding vertical do <main> (28px no topo) para que o card "Todas as
+     sessões" alinhe com o card de conteúdo à direita. */
+  padding: 28px 14px;
   background: var(--bg);
 }
 
@@ -1312,68 +1402,62 @@ select.input,
 .sidebar-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
 }
 
+/* "Todas as sessões" também é um card, como as sessões da lista. */
 .sidebar-all {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 16px;
-  border-radius: 999px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-faint);
-  background: transparent;
-  transition: color 0.15s ease;
-}
-
-.sidebar-all::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: currentColor;
-  flex-shrink: 0;
+  color: var(--text-soft);
+  transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .sidebar-all:hover {
-  color: var(--text-soft);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
 .sidebar-all.active {
   color: var(--text);
+  border-color: var(--primary);
 }
 
+/* Cada sessão na lateral é um card, com a data à esquerda e o horário à direita. */
 .sidebar-item {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 8px;
-  padding: 7px 16px;
-  border-radius: 999px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
   text-decoration: none;
-  color: var(--text-faint);
-  background: transparent;
-  transition: color 0.15s ease;
-}
-
-.sidebar-item::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: currentColor;
-  flex-shrink: 0;
+  color: var(--text-soft);
+  transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .sidebar-item:hover {
-  color: var(--text-soft);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
 .sidebar-item.active {
   color: var(--text);
+  border-color: var(--primary);
 }
 
 .sidebar-item-date {

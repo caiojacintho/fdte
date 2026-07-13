@@ -32,7 +32,6 @@ export function TransmissionButton() {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [noEnd, setNoEnd] = useState(false);
-  const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [url, setUrl] = useState('');
   const [createdId, setCreatedId] = useState('');
@@ -46,7 +45,6 @@ export function TransmissionButton() {
     setStart('');
     setEnd('');
     setNoEnd(false);
-    setDescription('');
     setError(null);
     setUrl('');
     setCreatedId('');
@@ -73,7 +71,7 @@ export function TransmissionButton() {
     const finalEnd = noEnd ? '' : end;
     const link = `${LINK_BASE}/${makeCode()}`;
     setUrl(link);
-    const item = addTransmission({ date, start, end: finalEnd, description: description.trim(), url: link });
+    const item = addTransmission({ date, start, end: finalEnd, description: '', url: link });
     setCreatedId(item.id);
     setStep('result');
   }
@@ -172,19 +170,6 @@ export function TransmissionButton() {
                     <input type="checkbox" checked={noEnd} onChange={(e) => setNoEnd(e.target.checked)} />
                     <span>Não definir horário final</span>
                   </label>
-
-                  <div className="field">
-                    <label htmlFor="t-desc">Descrição</label>
-                    <textarea
-                      id="t-desc"
-                      className="input"
-                      rows={3}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Alguma observação sobre esta sessão"
-                      style={{ resize: 'vertical', minHeight: 72 }}
-                    />
-                  </div>
 
                   {error && <span className="error-text">{error}</span>}
 

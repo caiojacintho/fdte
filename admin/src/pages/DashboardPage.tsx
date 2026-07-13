@@ -6,6 +6,7 @@ import { TransmissionSidebar } from '../components/TransmissionSidebar';
 import { CitySelect } from '../components/CitySelect';
 import { ExportMenu } from '../components/ExportMenu';
 import { api } from '../api/client';
+import { useTransmissions } from '../transmissions/store';
 import type { SubmissionListItem } from '@fdte/shared-types';
 
 function distinct(values: (string | null)[]): string[] {
@@ -16,6 +17,7 @@ function distinct(values: (string | null)[]): string[] {
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const transmissions = useTransmissions();
   const [rows, setRows] = useState<SubmissionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,18 +60,29 @@ export function DashboardPage() {
 
       <div className="app-body">
         <TransmissionSidebar />
-        <main className="app-main" style={{ padding: '28px 24px 80px' }}>
-          {/* Título da página + exportar todos os dados */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 16,
-              flexWrap: 'wrap',
-              marginBottom: 20,
-            }}
-          >
+        <main className="app-main" style={{ padding: '28px 24px 80px 0' }}>
+          {transmissions.length === 0 ? (
+            // Sem nenhuma sessão criada, o painel não exibe respostas — só o
+            // convite a criar a primeira sessão.
+            <div
+              className="table-wrap"
+              style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-faint)' }}
+            >
+              Nenhuma sessão criada ainda. Crie uma sessão para visualizar as respostas.
+            </div>
+          ) : (
+            <div className="session-panel">
+              {/* Título da página + exportar todos os dados */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  flexWrap: 'wrap',
+                  marginBottom: 20,
+                }}
+              >
             <h1 className="session-title">Todas as sessões</h1>
             <ExportMenu rows={rows} iconOnly />
           </div>
@@ -145,11 +158,13 @@ export function DashboardPage() {
             </table>
           </div>
 
-          {!loading && !error && filtered.length > 0 && (
-            <p style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-faint)' }}>
-              {filtered.length} {filtered.length === 1 ? 'resposta' : 'respostas'}
-              {hasFilters ? ` (de ${rows.length})` : ''}
-            </p>
+              {!loading && !error && filtered.length > 0 && (
+                <p style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-faint)' }}>
+                  {filtered.length} {filtered.length === 1 ? 'resposta' : 'respostas'}
+                  {hasFilters ? ` (de ${rows.length})` : ''}
+                </p>
+              )}
+            </div>
           )}
         </main>
       </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, ChevronRight, Copy, Link as LinkIcon, Trash2, Users, X } from 'lucide-react';
+import { Check, ChevronRight, Copy, Trash2, Users, X } from 'lucide-react';
 import { Header } from '../components/Header';
 import { TransmissionSidebar } from '../components/TransmissionSidebar';
 import { ExportMenu } from '../components/ExportMenu';
@@ -13,7 +13,8 @@ import {
 } from '../transmissions/store';
 import { api } from '../api/client';
 import type { SubmissionListItem, BairroSubmission } from '@fdte/shared-types';
-import { bairroCardLabel, codeFromUrl } from '../data/bairroCards';
+import { codeFromUrl } from '../data/bairroCards';
+import { BairroBoardPreview } from '../components/BairroBoardPreview';
 
 const MONTHS = [
   'Janeiro',
@@ -88,7 +89,6 @@ export function TransmissionPage() {
   const [viewGroup, setViewGroup] = useState<{ name: string; sub: BairroSubmission } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showGroups, setShowGroups] = useState(false);
   const [copiedGroupIdx, setCopiedGroupIdx] = useState<number | null>(null);
@@ -174,17 +174,6 @@ export function TransmissionPage() {
     navigate('/');
   }
 
-  async function copy() {
-    if (!session) return;
-    try {
-      await navigator.clipboard.writeText(session.url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* clipboard indisponível — o usuário pode copiar manualmente */
-    }
-  }
-
   async function copyGroup(idx: number, url: string) {
     try {
       await navigator.clipboard.writeText(url);
@@ -209,7 +198,7 @@ export function TransmissionPage() {
               Sessão não encontrada.
             </div>
           ) : (
-            <>
+            <div className="session-panel">
               {/* Cabeçalho da sessão */}
               <div className="session-head">
                 <div>
@@ -227,8 +216,6 @@ export function TransmissionPage() {
                       <span className="live-badge ended">Encerrado</span>
                     )}
                   </div>
-                  {session.description && <p className="session-desc">{session.description}</p>}
-
                   {/* Alterna entre as duas etapas — abaixo do título, alinhado à esquerda.
                       O botão "Jogo do bairro" acompanha as abas e só aparece na Etapa 2. */}
                   <div className="etapa-row">
@@ -252,48 +239,40 @@ export function TransmissionPage() {
                         Etapa 2
                       </button>
                     </div>
-                    {tab === 'etapa2' && (
-                      <button
-                        className="btn btn-secondary btn-inline"
-                        type="button"
-                        onClick={() => {
-                          setCopiedGroupIdx(null);
-                          setShowGroups(true);
-                        }}
-                      >
-                        Jogo do bairro
-                      </button>
-                    )}
                   </div>
                 </div>
 
-                <div className="session-actions">
-                  <button
-                    className="btn btn-secondary icon-btn"
-                    type="button"
-                    aria-label="Excluir sessão"
-                    title="Excluir sessão"
-                    onClick={() => setConfirmDelete(true)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  {isSessionLive(session) && (
-                    <button
-                      className="btn btn-secondary icon-btn"
-                      type="button"
-                      aria-label={copied ? 'Link copiado' : 'Copiar link de acesso'}
-                      title={copied ? 'Link copiado' : 'Copiar link de acesso'}
-                      onClick={copy}
-                    >
-                      {copied ? <Check size={16} /> : <LinkIcon size={16} />}
-                    </button>
-                  )}
-                  <ExportMenu rows={rows} iconOnly disabled={isSessionLive(session)} />
+                <div className="session-head-side">
+                  {/* "Encerrar sessão" no topo, alinhado ao título. */}
                   {isSessionLive(session) && (
                     <button className="btn" type="button" onClick={endSession}>
                       Encerrar sessão
                     </button>
                   )}
+                  {/* Ícones embaixo, na linha do segmented control. O botão de
+                      links fica à esquerda da lixeira. */}
+                  <div className="session-actions">
+                    <button
+                      className="btn btn-secondary btn-inline"
+                      type="button"
+                      onClick={() => {
+                        setCopiedGroupIdx(null);
+                        setShowGroups(true);
+                      }}
+                    >
+                      Link
+                    </button>
+                    <button
+                      className="btn btn-secondary icon-btn"
+                      type="button"
+                      aria-label="Excluir sessão"
+                      title="Excluir sessão"
+                      onClick={() => setConfirmDelete(true)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <ExportMenu rows={rows} iconOnly disabled={isSessionLive(session)} />
+                  </div>
                 </div>
               </div>
 
@@ -412,33 +391,51 @@ export function TransmissionPage() {
                     </table>
                   </div>
 
-                  {!loading && !error && sent.length > 0 && (
-                    <p style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-faint)' }}>
-                      {sent.length} {sent.length === 1 ? 'resposta enviada' : 'respostas enviadas'} · atualiza a cada{' '}
-                      {POLL_MS / 1000}s
-                    </p>
-                  )}
                 </>
               )}
-            </>
+            </div>
           )}
         </main>
       </div>
 
-      {/* Links dos grupos do Jogo do Bairro criados para esta sessão */}
+      {/* Links de acesso: Etapa 1 (Jogo da Moradia = link do formulário da sessão)
+          ou Etapa 2 (Jogo do bairro = um link por grupo). */}
       {showGroups && (
         <div className="modal-overlay" onClick={() => setShowGroups(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
               <div>
-                <h2 style={{ fontSize: '1.15rem' }}>Links dos grupos</h2>
+                <h2 style={{ fontSize: '1.15rem' }}>{tab === 'etapa1' ? 'Jogo da Moradia' : 'Jogo do bairro'}</h2>
               </div>
               <button className="modal-close" type="button" aria-label="Fechar" onClick={() => setShowGroups(false)}>
                 <X size={18} />
               </button>
             </div>
 
-            {session?.groups?.length ? (
+            {tab === 'etapa1' ? (
+              <div style={{ marginTop: 16 }}>
+                <div className="field">
+                  <label>Link de acesso</label>
+                  <div className="copy-field">
+                    <input
+                      className="input"
+                      readOnly
+                      value={session?.url ?? ''}
+                      onFocus={(e) => e.target.select()}
+                    />
+                    <button
+                      className="btn btn-secondary"
+                      type="button"
+                      onClick={() => copyGroup(0, session?.url ?? '')}
+                      aria-label={copiedGroupIdx === 0 ? 'Copiado' : 'Copiar link'}
+                      title={copiedGroupIdx === 0 ? 'Copiado' : 'Copiar'}
+                    >
+                      {copiedGroupIdx === 0 ? <Check size={16} /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : session?.groups?.length ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 16 }}>
                 {session.groups.map((g, i) => (
                   <div className="field" key={i}>
@@ -470,7 +467,7 @@ export function TransmissionPage() {
       {/* Respostas enviadas por um grupo no Jogo do Bairro */}
       {viewGroup && (
         <div className="modal-overlay" onClick={() => setViewGroup(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box modal-box-wide" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
               <div>
                 <h2 style={{ fontSize: '1.15rem' }}>{viewGroup.name} — respostas</h2>
@@ -485,25 +482,13 @@ export function TransmissionPage() {
               </button>
             </div>
 
-            {(() => {
-              const entries = Object.entries(viewGroup.sub.placements).sort((a, b) =>
-                a[0].localeCompare(b[0], undefined, { numeric: true })
-              );
-              if (entries.length === 0) {
-                return (
-                  <p style={{ color: 'var(--text-soft)', fontSize: '0.9rem', marginTop: 12 }}>
-                    Este grupo enviou o painel sem cartas.
-                  </p>
-                );
-              }
-              return (
-                <ol className="bairro-answer-list">
-                  {entries.map(([slot, cardId]) => (
-                    <li key={slot}>{bairroCardLabel(cardId)}</li>
-                  ))}
-                </ol>
-              );
-            })()}
+            {Object.keys(viewGroup.sub.placements).length === 0 ? (
+              <p style={{ color: 'var(--text-soft)', fontSize: '0.9rem', marginTop: 12 }}>
+                Este grupo enviou o painel sem cartas.
+              </p>
+            ) : (
+              <BairroBoardPreview board={viewGroup.sub.board} placements={viewGroup.sub.placements} />
+            )}
           </div>
         </div>
       )}
