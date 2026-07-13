@@ -11,18 +11,25 @@ export interface BoardData {
 
 // Coordenadas dos slots como frações (0-1). As cartas são desenhadas com tamanho
 // suficiente para COBRIR o contorno pontilhado (a forma opaca da carta o esconde).
-const COLS = [0.369, 0.531, 0.693, 0.855];
-const ROWS = [0.368, 0.583, 0.798];
-const CELL = 0.149; // lado do quadrado da carta (fração da largura)
+// Centros dos slots medidos diretamente na imagem tabuleiro.jpg (2600×1840):
+// cada carta é desenhada centralizada nesses pontos para cair exatamente sobre
+// o retângulo pontilhado, escondendo-o por completo.
+const COLS = [0.3692, 0.5375, 0.7057, 0.8738];
+const ROWS = [0.3501, 0.5818, 0.8212];
+const CELL = 0.152; // lado do quadrado da carta (fração da largura) — cobre o contorno pontilhado com folga
 const CARD_RATIO = 0.755; // proporção (largura/altura) da carta da etapa 1
 const SLOT1 = { cx: 0.162, cy: 0.449, h: 0.432 }; // "Como é hoje" (retângulo)
-const CIRCLE = { cx: 0.156, cy: 0.812, d: 0.162 }; // "Como mudar" (círculo)
+// "Como mudar" (círculo) — centro medido no disco pontilhado da imagem
+// (2600×1840). O bug do tracejado visível era o centro (cy estava 0.812, ~15px
+// acima do real 0.8204), não o tamanho: com o centro certo, o diâmetro original
+// 0.162 já cobre todo o contorno pontilhado sem ficar grande demais.
+const CIRCLE = { cx: 0.159, cy: 0.8204, d: 0.162 };
 // Cada valor é escrito à direita do respectivo rótulo (NOME/ENTIDADE/CIDADE),
 // alinhado à esquerda e truncado com reticências para não invadir o campo seguinte.
 const FIELDS = {
   y: 0.132,
-  nome: { x: 0.335, maxW: 0.185 },
-  entidade: { x: 0.615, maxW: 0.105 },
+  nome: { x: 0.328, maxW: 0.19 },
+  entidade: { x: 0.605, maxW: 0.115 },
   cidade: { x: 0.8, maxW: 0.15 },
 };
 
